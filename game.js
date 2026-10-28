@@ -1,494 +1,65 @@
-// ==========================================
-// AVENTURA PELO CORAÇÃO 💗
-// Jogo educativo — versão atualizada
-// ==========================================
 
-const $ = (id) => document.getElementById(id);
+"use strict";
+
+/* =====================================
+   AVENTURA PELO CORAÇÃO
+   Salvamento local sem banco de dados
+===================================== */
+
+const $ = id => document.getElementById(id);
 
 const canvas = $("game");
 const ctx = canvas.getContext("2d");
 
-// Elementos do HTML
-const cadastro = $("cadastro");
-const nomeJogadorInput = $("nomeJogador");
-const btnComecar = $("comecar");
-
-const informacoes = $("informacoes");
-const nomeAtual = $("nomeAtual");
-const vidasTexto = $("vidas");
-const pontosTexto = $("pontos");
-const faseTexto = $("fase");
-
-const mensagem = $("mensagem");
-
-const perguntaTela = $("pergunta");
-const tituloPergunta = $("tituloPergunta");
-const textoPergunta = $("textoPergunta");
-const opcoes = $("opcoes");
-const feedback = $("feedback");
-
-const resultado = $("resultado");
-const tituloResultado = $("tituloResultado");
-const resumo = $("resumo");
-const pontuacaoFinal = $("pontuacaoFinal");
-const detalhesPartida = $("detalhesPartida");
-
-const btnProximo = $("proximo");
-const btnVerRanking = $("verRanking");
-
-const rankingTela = $("rankingTela");
-const listaRanking = $("listaRanking");
-const btnNovoJogador = $("novoJogador");
-const btnLimparRanking = $("limparRanking");
-
-const btnEsquerda = $("esquerda");
-const btnDireita = $("direita");
-const btnPular = $("pular");
-
-// ==========================================
-// CONFIGURAÇÕES
-// ==========================================
-
-const LARGURA = canvas.width;
-const ALTURA = canvas.height;
-
-const CHAO = ALTURA - 55;
+const W = canvas.width;
+const H = canvas.height;
+const CHAO = H - 55;
 const MUNDO = 2300;
+const TOTAL = 5;
 
-const TOTAL_PERGUNTAS = 5;
-const VELOCIDADE = 4.2;
-const FORCA_PULO = -12.5;
-const GRAVIDADE = 0.58;
+const CHAVE_RANKING = "aventuraCoracaoRanking";
+const CHAVE_PARTIDAS = "aventuraCoracaoPartidas";
 
-let cameraX = 0;
-let jogoRodando = false;
-let jogoPausado = true;
-let jogoFinalizado = false;
+const cadastro = $("cadastro");
+const formCadastro = $("formCadastro");
+const nomeInput = $("nomeJogador");
+const informacoes = $("informacoes");
+const perguntaTela = $("pergunta");
+const resultado = $("resultado");
+const rankingTela = $("rankingTela");
 
+const teclas = {};
 let nomeJogador = "";
 let pontos = 0;
 let vidas = 3;
-let fase = 1;
-
 let indicePergunta = 0;
-let perguntasDaPartida = [];
-let respostasCorretas = 0;
-let respostasErradas = 0;
-
-let teclas = {};
-let tempoAnimacao = 0;
-let ultimaResposta = null;
-
+let acertos = 0;
+let erros = 0;
+let perguntas = [];
+let respostaFeita = false;
+let jogoPausado = true;
+let jogoFinalizado = false;
+let partidaSalva = false;
+let cameraX = 0;
+let tempo = 0;
 let particulas = [];
 let decoracoes = [];
-let historicoRespostas = [];
+let telaAnteriorRanking = "resultado";
 
 const jogador = {
     x: 70,
-    y: CHAO - 48,
+    y: CHAO - 44,
     w: 34,
     h: 44,
     vx: 0,
     vy: 0,
     noChao: true,
-    olhando: 1,
     invulneravel: 0
 };
 
-// ==========================================
-// BANCO DE PERGUNTAS
-// ==========================================
+const posicoesPerguntas = [350, 790, 1250, 1690, 2020];
 
 const bancoPerguntas = [
-    {
-        pergunta: "Qual órgão bombeia o sangue pelo corpo?",
-        opcoes: ["Pulmão", "Coração", "Estômago", "Cérebro"],
-        correta: 1,
-        explicacao: "O coração bombeia o sangue para todo o organismo."
-    },
-    {
-        pergunta: "Qual é a principal função do sangue?",
-        opcoes: [
-            "Produzir pensamentos",
-            "Transportar substâncias pelo corpo",
-            "Quebrar os ossos",
-            "Controlar os músculos sozinho"
-        ],
-        correta: 1,
-        explicacao: "O sangue transporta oxigênio, nutrientes e outras substâncias."
-    },
-    {
-        pergunta: "Qual componente do sangue transporta oxigênio?",
-        opcoes: ["Hemácias", "Plaquetas", "Plasma apenas", "Saliva"],
-        correta: 0,
-        explicacao: "As hemácias contêm hemoglobina, que transporta oxigênio."
-    },
-    {
-        pergunta: "Qual órgão é responsável pelas trocas gasosas?",
-        opcoes: ["Rins", "Pulmões", "Fígado", "Pâncreas"],
-        correta: 1,
-        explicacao: "Nos pulmões, o oxigênio entra no sangue e o gás carbônico é eliminado."
-    },
-    {
-        pergunta: "O que o coração faz quando bate?",
-        opcoes: [
-            "Filtra a urina",
-            "Bombeia o sangue",
-            "Produz os ossos",
-            "Digere os alimentos"
-        ],
-        correta: 1,
-        explicacao: "As contrações do coração impulsionam o sangue."
-    },
-    {
-        pergunta: "Qual vaso sanguíneo leva o sangue para fora do coração?",
-        opcoes: ["Veia", "Artéria", "Capilar linfático", "Nervo"],
-        correta: 1,
-        explicacao: "As artérias levam o sangue para longe do coração."
-    },
-    {
-        pergunta: "Qual vaso sanguíneo geralmente leva sangue ao coração?",
-        opcoes: ["Veia", "Artéria", "Bronquíolo", "Tendão"],
-        correta: 0,
-        explicacao: "As veias transportam o sangue de volta ao coração."
-    },
-    {
-        pergunta: "Onde acontece a maior parte das trocas entre sangue e tecidos?",
-        opcoes: ["Artérias grandes", "Capilares", "Ossos", "Tendões"],
-        correta: 1,
-        explicacao: "Os capilares têm paredes finas que permitem trocas de substâncias."
-    },
-    {
-        pergunta: "Qual é a função das plaquetas?",
-        opcoes: [
-            "Transportar oxigênio",
-            "Ajudar na coagulação",
-            "Produzir ar",
-            "Digestionar proteínas"
-        ],
-        correta: 1,
-        explicacao: "As plaquetas participam da formação de coágulos para conter sangramentos."
-    },
-    {
-        pergunta: "Qual é a parte líquida do sangue?",
-        opcoes: ["Plasma", "Hemácia", "Plaqueta", "Cartilagem"],
-        correta: 0,
-        explicacao: "O plasma é a parte líquida que transporta várias substâncias."
-    },
-    {
-        pergunta: "Qual lado do coração bombeia sangue para os pulmões?",
-        opcoes: ["Lado direito", "Lado esquerdo", "Os rins", "Nenhum lado"],
-        correta: 0,
-        explicacao: "O lado direito envia sangue aos pulmões para receber oxigênio."
-    },
-    {
-        pergunta: "Qual lado do coração envia sangue oxigenado ao corpo?",
-        opcoes: ["Lado direito", "Lado esquerdo", "Somente as veias", "Nenhum lado"],
-        correta: 1,
-        explicacao: "O lado esquerdo bombeia sangue oxigenado para a circulação do corpo."
-    },
-    {
-        pergunta: "Qual é o nome da circulação entre coração e pulmões?",
-        opcoes: [
-            "Circulação pulmonar",
-            "Circulação digestiva",
-            "Circulação óssea",
-            "Circulação muscular"
-        ],
-        correta: 0,
-        explicacao: "A circulação pulmonar leva sangue do coração aos pulmões e de volta."
-    },
-    {
-        pergunta: "Qual é o nome da circulação que atende ao restante do corpo?",
-        opcoes: [
-            "Circulação pulmonar",
-            "Circulação sistêmica",
-            "Circulação gástrica",
-            "Circulação externa"
-        ],
-        correta: 1,
-        explicacao: "A circulação sistêmica distribui sangue entre o coração e os tecidos."
-    },
-    {
-        pergunta: "Qual órgão filtra o sangue para produzir urina?",
-        opcoes: ["Coração", "Rim", "Pulmão", "Baço"],
-        correta: 1,
-        explicacao: "Os rins filtram o sangue e ajudam a regular água e sais do organismo."
-    },
-    {
-        pergunta: "O que significa frequência cardíaca?",
-        opcoes: [
-            "Número de respirações por dia",
-            "Número de batimentos do coração por minuto",
-            "Quantidade de ossos",
-            "Temperatura do sangue"
-        ],
-        correta: 1,
-        explicacao: "A frequência cardíaca indica quantas vezes o coração bate por minuto."
-    },
-    {
-        pergunta: "O que pode acontecer com a frequência cardíaca durante exercícios?",
-        opcoes: [
-            "Pode aumentar",
-            "Sempre chega a zero",
-            "Não pode mudar",
-            "O coração para normalmente"
-        ],
-        correta: 0,
-        explicacao: "Durante exercícios, o corpo costuma precisar de mais oxigênio, e a frequência pode aumentar."
-    },
-    {
-        pergunta: "Qual gás usamos na respiração celular?",
-        opcoes: ["Oxigênio", "Hélio", "Neônio", "Hidrogênio puro"],
-        correta: 0,
-        explicacao: "As células usam oxigênio para obter energia a partir dos nutrientes."
-    },
-    {
-        pergunta: "Qual gás é eliminado em maior quantidade na expiração?",
-        opcoes: ["Oxigênio", "Gás carbônico", "Hélio", "Ozônio"],
-        correta: 1,
-        explicacao: "O gás carbônico é produzido pelo metabolismo e eliminado pelos pulmões."
-    },
-    {
-        pergunta: "Qual estrutura impede que alimentos entrem nas vias respiratórias durante a deglutição?",
-        opcoes: ["Epiglote", "Rim", "Ventrículo", "Hemácia"],
-        correta: 0,
-        explicacao: "A epiglote ajuda a proteger a entrada da via respiratória durante a deglutição."
-    },
-    {
-        pergunta: "Qual é a função dos glóbulos brancos?",
-        opcoes: [
-            "Defesa do organismo",
-            "Produção de bile",
-            "Transporte exclusivo de oxigênio",
-            "Formação dos dentes"
-        ],
-        correta: 0,
-        explicacao: "Os glóbulos brancos fazem parte do sistema de defesa do corpo."
-    },
-    {
-        pergunta: "O que é pressão arterial?",
-        opcoes: [
-            "A pressão do sangue nas paredes das artérias",
-            "A temperatura dos pulmões",
-            "A força dos ossos",
-            "A quantidade de saliva"
-        ],
-        correta: 0,
-        explicacao: "A pressão arterial representa a força que o sangue exerce nas paredes das artérias."
-    },
-    {
-        pergunta: "Qual cavidade do coração recebe sangue que vem do corpo?",
-        opcoes: [
-            "Átrio direito",
-            "Ventrículo esquerdo",
-            "Átrio esquerdo",
-            "Ventrículo direito"
-        ],
-        correta: 0,
-        explicacao: "O átrio direito recebe o sangue que retorna do corpo."
-    },
-    {
-        pergunta: "Qual cavidade bombeia sangue para a circulação do corpo?",
-        opcoes: [
-            "Átrio direito",
-            "Ventrículo esquerdo",
-            "Átrio esquerdo",
-            "Veia cava"
-        ],
-        correta: 1,
-        explicacao: "O ventrículo esquerdo bombeia sangue para a artéria aorta."
-    },
-    {
-        pergunta: "Qual é a maior artéria do corpo humano?",
-        opcoes: ["Aorta", "Veia cava", "Artéria pulmonar", "Carótida"],
-        correta: 0,
-        explicacao: "A aorta é a principal artéria que distribui sangue para o corpo."
-    },
-    {
-        pergunta: "Qual vaso leva sangue do coração aos pulmões?",
-        opcoes: [
-            "Artéria pulmonar",
-            "Veia pulmonar",
-            "Veia cava",
-            "Artéria renal"
-        ],
-        correta: 0,
-        explicacao: "A artéria pulmonar leva sangue do coração até os pulmões."
-    },
-    {
-        pergunta: "Qual vaso traz sangue dos pulmões para o coração?",
-        opcoes: [
-            "Artéria aorta",
-            "Veia pulmonar",
-            "Artéria renal",
-            "Veia porta"
-        ],
-        correta: 1,
-        explicacao: "As veias pulmonares levam sangue oxigenado aos átrios esquerdos."
-    },
-    {
-        pergunta: "Qual é a principal função das válvulas cardíacas?",
-        opcoes: [
-            "Impedir o refluxo do sangue",
-            "Produzir células sanguíneas",
-            "Aquecer o ar",
-            "Filtrar a urina"
-        ],
-        correta: 0,
-        explicacao: "As válvulas ajudam a manter o sangue fluindo na direção correta."
-    },
-    {
-        pergunta: "Qual estrutura separa as cavidades direita e esquerda do coração?",
-        opcoes: ["Septo", "Traqueia", "Diafragma", "Pelve"],
-        correta: 0,
-        explicacao: "O septo separa os lados direito e esquerdo do coração."
-    },
-    {
-        pergunta: "Qual músculo é muito importante para a respiração?",
-        opcoes: ["Diafragma", "Bíceps", "Masseter", "Trapézio"],
-        correta: 0,
-        explicacao: "O diafragma se contrai e relaxa, ajudando a movimentar o ar."
-    },
-    {
-        pergunta: "Onde ficam os alvéolos pulmonares?",
-        opcoes: [
-            "Nos pulmões",
-            "No estômago",
-            "Nos rins",
-            "No coração"
-        ],
-        correta: 0,
-        explicacao: "Os alvéolos são pequenas estruturas pulmonares onde ocorrem trocas gasosas."
-    },
-    {
-        pergunta: "O que é anemia, de forma geral?",
-        opcoes: [
-            "Uma condição que reduz a capacidade do sangue de transportar oxigênio",
-            "Uma fratura óssea",
-            "Uma inflamação do estômago em todos os casos",
-            "Um tipo de músculo"
-        ],
-        correta: 0,
-        explicacao: "A anemia pode envolver redução de hemoglobina ou de glóbulos vermelhos, entre outras causas."
-    },
-    {
-        pergunta: "Qual hábito ajuda a cuidar do sistema cardiovascular?",
-        opcoes: [
-            "Praticar atividade física adequada",
-            "Fumar",
-            "Dormir sempre muito pouco",
-            "Evitar toda forma de movimento"
-        ],
-        correta: 0,
-        explicacao: "Atividade física adequada, alimentação equilibrada e acompanhamento de saúde ajudam na prevenção."
-    },
-    {
-        pergunta: "O que é um pulso arterial?",
-        opcoes: [
-            "A expansão rítmica de uma artéria causada pelos batimentos cardíacos",
-            "O movimento dos pulmões apenas",
-            "O som da digestão",
-            "A contração dos ossos"
-        ],
-        correta: 0,
-        explicacao: "O pulso pode ser percebido em artérias próximas à superfície do corpo."
-    },
-    {
-        pergunta: "Qual é a função da hemoglobina?",
-        opcoes: [
-            "Ajudar a transportar oxigênio",
-            "Produzir urina",
-            "Quebrar os alimentos no estômago",
-            "Formar cartilagem"
-        ],
-        correta: 0,
-        explicacao: "A hemoglobina presente nas hemácias se liga ao oxigênio."
-    },
-    {
-        pergunta: "O que acontece com o sangue nos capilares dos tecidos?",
-        opcoes: [
-            "Pode trocar gases e nutrientes com as células",
-            "Transforma-se em osso",
-            "Deixa de circular para sempre",
-            "Vira ar"
-        ],
-        correta: 0,
-        explicacao: "Os capilares permitem trocas de substâncias entre o sangue e os tecidos."
-    },
-    {
-        pergunta: "Qual órgão produz a bile, que ajuda na digestão de gorduras?",
-        opcoes: ["Fígado", "Coração", "Pulmão", "Rim"],
-        correta: 0,
-        explicacao: "O fígado produz a bile, que é armazenada na vesícula biliar."
-    },
-    {
-        pergunta: "Qual é a função principal do sistema circulatório?",
-        opcoes: [
-            "Transportar sangue e substâncias pelo organismo",
-            "Produzir todos os hormônios",
-            "Controlar somente a visão",
-            "Formar os alimentos"
-        ],
-        correta: 0,
-        explicacao: "O sistema circulatório transporta oxigênio, nutrientes, hormônios e resíduos."
-    },
-    {
-        pergunta: "O sangue rico em oxigênio é chamado de:",
-        opcoes: [
-            "Sangue oxigenado",
-            "Sangue sem células",
-            "Plasma puro",
-            "Linfa óssea"
-        ],
-        correta: 0,
-        explicacao: "Sangue oxigenado é aquele com maior concentração de oxigênio."
-    },
-    {
-        pergunta: "Qual componente do sangue é formado principalmente por água e substâncias dissolvidas?",
-        opcoes: ["Plasma", "Hemácia", "Plaqueta", "Neurônio"],
-        correta: 0,
-        explicacao: "O plasma contém água, proteínas, sais e outras substâncias dissolvidas."
-    },
-    {
-        pergunta: "Qual estrutura conduz o ar da laringe até os brônquios?",
-        opcoes: ["Traqueia", "Esôfago", "Aorta", "Ureter"],
-        correta: 0,
-        explicacao: "A traqueia conduz o ar até os brônquios."
-    },
-    {
-        pergunta: "Qual é a função dos brônquios?",
-        opcoes: [
-            "Conduzir o ar para dentro dos pulmões",
-            "Bombear sangue",
-            "Filtrar a urina",
-            "Produzir glóbulos vermelhos"
-        ],
-        correta: 0,
-        explicacao: "Os brônquios levam o ar da traqueia para os pulmões."
-    },
-    {
-        pergunta: "O que é a circulação sanguínea?",
-        opcoes: [
-            "O movimento do sangue pelo corpo",
-            "A digestão dos alimentos",
-            "O crescimento dos cabelos",
-            "A produção de suor apenas"
-        ],
-        correta: 0,
-        explicacao: "A circulação é o percurso do sangue pelo coração e pelos vasos sanguíneos."
-    },
-    {
-        pergunta: "Por que o coração tem paredes musculares?",
-        opcoes: [
-            "Para se contrair e bombear sangue",
-            "Para produzir ar",
-            "Para armazenar alimentos",
-            "Para fabricar ossos"
-        ],
-        correta: 0,
-        explicacao: "O músculo cardíaco se contrai para impulsionar o sangue."
-    },
     {
         pergunta: "Qual é o nome do músculo do coração?",
         opcoes: ["Miocárdio", "Diafragma", "Bíceps", "Tendão"],
@@ -496,76 +67,185 @@ const bancoPerguntas = [
         explicacao: "O miocárdio é o tecido muscular responsável pelas contrações cardíacas."
     },
     {
-        pergunta: "Qual estrutura registra a atividade elétrica do coração?",
-        opcoes: [
-            "Eletrocardiograma",
-            "Radiografia do pé",
-            "Teste de visão",
-            "Ultrassom dos rins apenas"
-        ],
-        correta: 0,
-        explicacao: "O eletrocardiograma registra a atividade elétrica cardíaca."
+        pergunta: "Qual órgão bombeia o sangue pelo corpo?",
+        opcoes: ["Pulmão", "Coração", "Estômago", "Cérebro"],
+        correta: 1,
+        explicacao: "O coração bombeia o sangue para todo o organismo."
     },
     {
-        pergunta: "O que o sistema linfático também ajuda a fazer?",
-        opcoes: [
-            "Participar da defesa do organismo e devolver líquido aos vasos sanguíneos",
-            "Bombear sangue como o coração",
-            "Produzir ar nos pulmões",
-            "Substituir todos os rins"
-        ],
+        pergunta: "Qual componente do sangue transporta oxigênio?",
+        opcoes: ["Hemácias", "Plaquetas", "Saliva", "Neurônios"],
         correta: 0,
-        explicacao: "O sistema linfático participa da defesa e do equilíbrio dos líquidos corporais."
+        explicacao: "As hemácias contêm hemoglobina, que transporta oxigênio."
     },
     {
-        pergunta: "Qual atitude é importante se alguém apresentar dor forte no peito e dificuldade para respirar?",
+        pergunta: "Qual é a função das plaquetas?",
+        opcoes: ["Transportar oxigênio", "Ajudar na coagulação", "Produzir ar", "Digestionar alimentos"],
+        correta: 1,
+        explicacao: "As plaquetas participam da coagulação do sangue."
+    },
+    {
+        pergunta: "Qual é a parte líquida do sangue?",
+        opcoes: ["Plasma", "Hemácia", "Plaqueta", "Miocárdio"],
+        correta: 0,
+        explicacao: "O plasma é a parte líquida do sangue."
+    },
+    {
+        pergunta: "Qual órgão realiza as trocas gasosas?",
+        opcoes: ["Rins", "Pulmões", "Fígado", "Estômago"],
+        correta: 1,
+        explicacao: "Nos pulmões, o oxigênio entra no sangue e o gás carbônico é eliminado."
+    },
+    {
+        pergunta: "Qual vaso sanguíneo leva o sangue para fora do coração?",
+        opcoes: ["Veia", "Artéria", "Nervo", "Tendão"],
+        correta: 1,
+        explicacao: "As artérias levam o sangue para longe do coração."
+    },
+    {
+        pergunta: "Qual vaso sanguíneo geralmente leva sangue de volta ao coração?",
+        opcoes: ["Veia", "Artéria", "Brônquio", "Traqueia"],
+        correta: 0,
+        explicacao: "As veias transportam o sangue de volta ao coração."
+    },
+    {
+        pergunta: "Qual é a função dos glóbulos brancos?",
+        opcoes: ["Defender o organismo", "Transportar oxigênio", "Formar os ossos", "Produzir bile"],
+        correta: 0,
+        explicacao: "Os glóbulos brancos participam da defesa do organismo."
+    },
+    {
+        pergunta: "Qual órgão filtra o sangue e ajuda a produzir urina?",
+        opcoes: ["Coração", "Rim", "Pulmão", "Baço"],
+        correta: 1,
+        explicacao: "Os rins filtram o sangue e ajudam a regular a água e os sais."
+    },
+    {
+        pergunta: "O que significa frequência cardíaca?",
+        opcoes: ["Batimentos por minuto", "Número de ossos", "Temperatura do corpo", "Quantidade de ar"],
+        correta: 0,
+        explicacao: "A frequência cardíaca indica quantas vezes o coração bate por minuto."
+    },
+    {
+        pergunta: "Qual gás usamos na respiração celular?",
+        opcoes: ["Oxigênio", "Hélio", "Neônio", "Ozônio"],
+        correta: 0,
+        explicacao: "As células usam oxigênio para obter energia."
+    },
+    {
+        pergunta: "Qual gás eliminamos ao expirar?",
+        opcoes: ["Gás carbônico", "Hélio", "Neônio", "Hidrogênio"],
+        correta: 0,
+        explicacao: "O gás carbônico produzido pelo organismo é eliminado pelos pulmões."
+    },
+    {
+        pergunta: "Qual músculo é importante para a respiração?",
+        opcoes: ["Diafragma", "Bíceps", "Masseter", "Trapézio"],
+        correta: 0,
+        explicacao: "O diafragma ajuda a movimentar o ar durante a respiração."
+    },
+    {
+        pergunta: "Onde ficam os alvéolos pulmonares?",
+        opcoes: ["Nos pulmões", "Nos rins", "No estômago", "No coração"],
+        correta: 0,
+        explicacao: "Os alvéolos são estruturas pulmonares onde ocorrem trocas gasosas."
+    },
+    {
+        pergunta: "Qual é a maior artéria do corpo humano?",
+        opcoes: ["Aorta", "Veia cava", "Carótida", "Artéria renal"],
+        correta: 0,
+        explicacao: "A aorta é a principal artéria que distribui sangue ao corpo."
+    },
+    {
+        pergunta: "Qual é a função das válvulas cardíacas?",
+        opcoes: ["Impedir o refluxo do sangue", "Produzir células", "Filtrar urina", "Aquecer o ar"],
+        correta: 0,
+        explicacao: "As válvulas ajudam o sangue a seguir na direção correta."
+    },
+    {
+        pergunta: "O que é pressão arterial?",
         opcoes: [
-            "Procurar ajuda médica de emergência",
-            "Ignorar os sintomas",
-            "Continuar fazendo esforço",
-            "Esperar vários dias sem contar a ninguém"
+            "Pressão do sangue nas paredes das artérias",
+            "Temperatura dos pulmões",
+            "Força dos ossos",
+            "Quantidade de saliva"
         ],
+        correta: 0,
+        explicacao: "A pressão arterial representa a força do sangue nas paredes das artérias."
+    },
+    {
+        pergunta: "Qual estrutura conduz o ar até os brônquios?",
+        opcoes: ["Traqueia", "Esôfago", "Aorta", "Ureter"],
+        correta: 0,
+        explicacao: "A traqueia conduz o ar até os brônquios."
+    },
+    {
+        pergunta: "Qual é a função principal do sistema circulatório?",
+        opcoes: ["Transportar sangue e substâncias", "Controlar somente a visão", "Produzir hormônios", "Formar alimentos"],
+        correta: 0,
+        explicacao: "O sistema circulatório transporta oxigênio, nutrientes e outras substâncias."
+    },
+    {
+        pergunta: "Qual lado do coração bombeia sangue para os pulmões?",
+        opcoes: ["Lado direito", "Lado esquerdo", "Somente as veias", "Nenhum lado"],
+        correta: 0,
+        explicacao: "O lado direito envia sangue aos pulmões para receber oxigênio."
+    },
+    {
+        pergunta: "Qual lado do coração envia sangue oxigenado para o corpo?",
+        opcoes: ["Lado direito", "Lado esquerdo", "Somente os pulmões", "Nenhum lado"],
+        correta: 1,
+        explicacao: "O lado esquerdo bombeia sangue oxigenado para o corpo."
+    },
+    {
+        pergunta: "Qual é a função da hemoglobina?",
+        opcoes: ["Ajudar a transportar oxigênio", "Produzir urina", "Formar cartilagem", "Digestionar alimentos"],
+        correta: 0,
+        explicacao: "A hemoglobina presente nas hemácias se liga ao oxigênio."
+    },
+    {
+        pergunta: "O que acontece nos capilares sanguíneos?",
+        opcoes: ["Trocas de substâncias com os tecidos", "O sangue vira osso", "O ar é produzido", "Os alimentos são mastigados"],
+        correta: 0,
+        explicacao: "Os capilares permitem trocas de gases e nutrientes entre sangue e tecidos."
+    },
+    {
+        pergunta: "Qual hábito ajuda a cuidar do coração?",
+        opcoes: ["Praticar atividade física adequada", "Fumar", "Dormir pouco sempre", "Evitar todo movimento"],
+        correta: 0,
+        explicacao: "Hábitos saudáveis ajudam a cuidar da saúde cardiovascular."
+    },
+    {
+        pergunta: "Qual órgão produz a bile?",
+        opcoes: ["Fígado", "Coração", "Pulmão", "Rim"],
+        correta: 0,
+        explicacao: "O fígado produz a bile, que ajuda na digestão das gorduras."
+    },
+    {
+        pergunta: "Qual estrutura separa os lados direito e esquerdo do coração?",
+        opcoes: ["Septo", "Traqueia", "Diafragma", "Pelve"],
+        correta: 0,
+        explicacao: "O septo separa os lados direito e esquerdo do coração."
+    },
+    {
+        pergunta: "Qual cavidade recebe sangue que retorna do corpo?",
+        opcoes: ["Átrio direito", "Ventrículo esquerdo", "Átrio esquerdo", "Aorta"],
+        correta: 0,
+        explicacao: "O átrio direito recebe o sangue que retorna do corpo."
+    },
+    {
+        pergunta: "O que fazer diante de dor forte no peito e dificuldade para respirar?",
+        opcoes: ["Procurar ajuda médica de emergência", "Ignorar", "Continuar fazendo esforço", "Esperar vários dias"],
         correta: 0,
         explicacao: "Esses sintomas podem indicar uma emergência e precisam de avaliação imediata."
     },
     {
-        pergunta: "Qual é a função das válvulas nas veias de algumas regiões do corpo?",
-        opcoes: [
-            "Ajudar a impedir o retorno do sangue",
-            "Produzir oxigênio",
-            "Criar células nervosas",
-            "Realizar a digestão"
-        ],
+        pergunta: "Qual é uma função do sangue?",
+        opcoes: ["Transportar oxigênio e nutrientes", "Produzir os ossos diretamente", "Substituir os pulmões", "Digestionar alimentos na boca"],
         correta: 0,
-        explicacao: "As válvulas venosas ajudam o sangue a seguir em direção ao coração."
-    },
-    {
-        pergunta: "O que pode ajudar a manter a saúde do coração?",
-        opcoes: [
-            "Alimentação equilibrada, movimento e acompanhamento de saúde",
-            "Fumar diariamente",
-            "Evitar dormir adequadamente",
-            "Não beber água nunca"
-        ],
-        correta: 0,
-        explicacao: "Hábitos saudáveis e acompanhamento profissional contribuem para a saúde cardiovascular."
-    },
-    {
-        pergunta: "Qual é a função do sangue na regulação da temperatura corporal?",
-        opcoes: [
-            "Distribuir calor pelo corpo",
-            "Transformar calor em ossos",
-            "Parar a circulação",
-            "Impedir toda transpiração"
-        ],
-        correta: 0,
-        explicacao: "O sangue ajuda a distribuir calor e participa da regulação da temperatura."
+        explicacao: "O sangue transporta oxigênio, nutrientes, hormônios e resíduos."
     }
 ];
-
-// ==========================================
-// OBSTÁCULOS DO MUNDO
-// ==========================================
 
 const obstaculos = [
     { x: 190, w: 42, h: 30, tipo: "coagulo" },
@@ -580,9 +260,70 @@ const obstaculos = [
     { x: 2140, w: 52, h: 36, tipo: "rocha" }
 ];
 
-// ==========================================
-// INICIALIZAÇÃO
-// ==========================================
+/* ---------- Salvamento ---------- */
+
+function lerDados(chave) {
+    try {
+        const dados = JSON.parse(localStorage.getItem(chave) || "[]");
+        return Array.isArray(dados) ? dados : [];
+    } catch (erro) {
+        console.error("Erro ao ler dados:", erro);
+        return [];
+    }
+}
+
+function guardarDados(chave, dados) {
+    try {
+        localStorage.setItem(chave, JSON.stringify(dados));
+        return true;
+    } catch (erro) {
+        console.error("Erro ao guardar dados:", erro);
+        alert("Não foi possível salvar. Verifique o espaço disponível no navegador.");
+        return false;
+    }
+}
+
+function guardarPartida(partida) {
+    const partidas = lerDados(CHAVE_PARTIDAS);
+
+    if (partidas.some(item => item.id === partida.id)) return;
+
+    partidas.push(partida);
+
+    if (!guardarDados(CHAVE_PARTIDAS, partidas)) return;
+
+    const ranking = lerDados(CHAVE_RANKING);
+
+    ranking.push({
+        id: partida.id,
+        nome: partida.nome,
+        pontos: partida.pontos,
+        acertos: partida.acertos,
+        erros: partida.erros,
+        data: partida.data
+    });
+
+    ranking.sort((a, b) => b.pontos - a.pontos);
+
+    guardarDados(CHAVE_RANKING, ranking.slice(0, 100));
+}
+
+/* ---------- Telas ---------- */
+
+function mostrar(elemento) {
+    elemento.classList.remove("escondido");
+}
+
+function esconder(elemento) {
+    elemento.classList.add("escondido");
+}
+
+function atualizarPainel() {
+    $("nomeAtual").textContent = nomeJogador;
+    $("vidas").textContent = "❤️".repeat(Math.max(0, vidas));
+    $("pontos").textContent = pontos;
+    $("fase").textContent = `${Math.min(indicePergunta + 1, TOTAL)}/${TOTAL}`;
+}
 
 function embaralhar(lista) {
     const copia = [...lista];
@@ -595,69 +336,54 @@ function embaralhar(lista) {
     return copia;
 }
 
-function iniciarJogo() {
-    const nomeDigitado = nomeJogadorInput?.value.trim();
+/* ---------- Iniciar ---------- */
 
-    if (!nomeDigitado) {
+function iniciarJogo(evento) {
+    evento.preventDefault();
+
+    const nome = nomeInput.value.trim();
+
+    if (!nome) {
         alert("Digite seu nome para começar! 💗");
-        nomeJogadorInput?.focus();
+        nomeInput.focus();
         return;
     }
 
-    nomeJogador = nomeDigitado;
-
+    nomeJogador = nome.slice(0, 24);
     pontos = 0;
     vidas = 3;
-    fase = 1;
-
     indicePergunta = 0;
-    respostasCorretas = 0;
-    respostasErradas = 0;
+    acertos = 0;
+    erros = 0;
+    respostaFeita = false;
+    jogoFinalizado = false;
+    partidaSalva = false;
+    cameraX = 0;
+    tempo = 0;
+    particulas = [];
 
-    historicoRespostas = [];
-    perguntasDaPartida = embaralhar(bancoPerguntas).slice(0, TOTAL_PERGUNTAS);
+    perguntas = embaralhar(bancoPerguntas).slice(0, TOTAL);
 
     jogador.x = 70;
     jogador.y = CHAO - jogador.h;
     jogador.vx = 0;
     jogador.vy = 0;
     jogador.noChao = true;
-    jogador.olhando = 1;
     jogador.invulneravel = 0;
-
-    cameraX = 0;
-    tempoAnimacao = 0;
-    particulas = [];
-
-    jogoFinalizado = false;
-    jogoRodando = true;
-    jogoPausado = false;
 
     esconder(cadastro);
     esconder(resultado);
     esconder(rankingTela);
     esconder(perguntaTela);
-    esconder(mensagem);
-
     mostrar(informacoes);
-    atualizarPainel();
 
     criarDecoracoes();
-    criarParticulas(jogador.x + 20, jogador.y + 20, "#ff7eae", 15);
-
-    requestAnimationFrame(loopJogo);
+    atualizarPainel();
+    limparTeclas();
+    jogoPausado = false;
 }
 
-function atualizarPainel() {
-    if (nomeAtual) nomeAtual.textContent = nomeJogador;
-    if (vidasTexto) vidasTexto.textContent = "❤️".repeat(Math.max(0, vidas));
-    if (pontosTexto) pontosTexto.textContent = pontos;
-    if (faseTexto) faseTexto.textContent = `${Math.min(indicePergunta + 1, TOTAL_PERGUNTAS)}/${TOTAL_PERGUNTAS}`;
-}
-
-// ==========================================
-// ELEMENTOS VISUAIS
-// ==========================================
+/* ---------- Cenário ---------- */
 
 function criarDecoracoes() {
     decoracoes = [];
@@ -667,7 +393,6 @@ function criarDecoracoes() {
             x: Math.random() * MUNDO,
             y: 20 + Math.random() * (CHAO - 70),
             tamanho: 2 + Math.random() * 5,
-            tipo: Math.random() > 0.5 ? "bolinha" : "brilho",
             cor: ["#ffc2d7", "#ff8fb8", "#d9c2ff", "#fff0a8"][Math.floor(Math.random() * 4)]
         });
     }
@@ -687,139 +412,82 @@ function criarParticulas(x, y, cor, quantidade = 12) {
     }
 }
 
-function desenharParticulas() {
-    for (let i = particulas.length - 1; i >= 0; i--) {
-        const p = particulas[i];
-
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.12;
-        p.vida--;
-
-        ctx.globalAlpha = Math.max(0, p.vida / 40);
-        ctx.fillStyle = p.cor;
-        ctx.beginPath();
-        ctx.arc(p.x - cameraX, p.y, p.tamanho, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-
-        if (p.vida <= 0) {
-            particulas.splice(i, 1);
-        }
-    }
-}
-
 function desenharFundo() {
-    const gradiente = ctx.createLinearGradient(0, 0, 0, ALTURA);
-
+    const gradiente = ctx.createLinearGradient(0, 0, 0, H);
     gradiente.addColorStop(0, "#fce8f2");
     gradiente.addColorStop(0.55, "#f7d8ec");
     gradiente.addColorStop(1, "#e7d9ff");
 
     ctx.fillStyle = gradiente;
-    ctx.fillRect(0, 0, LARGURA, ALTURA);
+    ctx.fillRect(0, 0, W, H);
 
-    // Vasos sanguíneos decorativos ao fundo
-    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(226,91,143,0.15)";
     ctx.lineWidth = 9;
-    ctx.strokeStyle = "rgba(226, 91, 143, 0.15)";
-
     ctx.beginPath();
     ctx.moveTo(0, 100);
     ctx.bezierCurveTo(220, 30, 330, 180, 520, 105);
     ctx.bezierCurveTo(700, 40, 820, 150, 1000, 80);
     ctx.stroke();
 
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+    decoracoes.forEach(d => {
+        const x = d.x - cameraX * 0.35;
 
-    ctx.beginPath();
-    ctx.moveTo(0, 105);
-    ctx.bezierCurveTo(220, 35, 330, 185, 520, 110);
-    ctx.bezierCurveTo(700, 45, 820, 155, 1000, 85);
-    ctx.stroke();
+        if (x < -10 || x > W + 10) return;
 
-    // Brilhos do cenário
-    for (const d of decoracoes) {
-        const telaX = d.x - cameraX * 0.35;
-
-        if (telaX < -10 || telaX > LARGURA + 10) continue;
-
-        ctx.globalAlpha = 0.7;
         ctx.fillStyle = d.cor;
-
-        if (d.tipo === "bolinha") {
-            ctx.beginPath();
-            ctx.arc(telaX, d.y, d.tamanho, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            ctx.font = `${d.tamanho * 3}px Arial`;
-            ctx.fillText("✦", telaX, d.y);
-        }
-    }
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.arc(x, d.y, d.tamanho, 0, Math.PI * 2);
+        ctx.fill();
+    });
 
     ctx.globalAlpha = 1;
 
-    // Nuvens fofinhas
-    desenharNuvem(120 - cameraX * 0.15, 70, 1);
-    desenharNuvem(460 - cameraX * 0.15, 110, 0.8);
-    desenharNuvem(790 - cameraX * 0.15, 60, 1.1);
-}
+    [120, 460, 790].forEach((x, i) => {
+        const nx = x - cameraX * 0.15;
+        const ny = [70, 110, 60][i];
 
-function desenharNuvem(x, y, escala) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(escala, escala);
-
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
-    ctx.beginPath();
-    ctx.arc(0, 10, 17, 0, Math.PI * 2);
-    ctx.arc(22, 0, 22, 0, Math.PI * 2);
-    ctx.arc(44, 11, 17, 0, Math.PI * 2);
-    ctx.arc(23, 16, 22, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.beginPath();
+        ctx.arc(nx, ny, 18, 0, Math.PI * 2);
+        ctx.arc(nx + 22, ny - 8, 23, 0, Math.PI * 2);
+        ctx.arc(nx + 45, ny, 18, 0, Math.PI * 2);
+        ctx.fill();
+    });
 }
 
 function desenharChao() {
     ctx.fillStyle = "#d6b2e7";
-    ctx.fillRect(0, CHAO, LARGURA, ALTURA - CHAO);
+    ctx.fillRect(0, CHAO, W, H - CHAO);
 
     ctx.fillStyle = "#bde7cf";
-    ctx.fillRect(0, CHAO, LARGURA, 8);
+    ctx.fillRect(0, CHAO, W, 8);
 
     ctx.fillStyle = "#9ed9b8";
-    ctx.fillRect(0, CHAO + 8, LARGURA, 5);
+    ctx.fillRect(0, CHAO + 8, W, 5);
 
-    // Pequenas marcas no chão
-    for (let x = -20; x < LARGURA + 30; x += 45) {
-        const px = x - (cameraX % 45);
-
+    for (let x = -20; x < W + 30; x += 45) {
         ctx.fillStyle = "rgba(255,255,255,0.55)";
         ctx.beginPath();
-        ctx.ellipse(px, CHAO + 27, 8, 3, 0, 0, Math.PI * 2);
+        ctx.ellipse(x - (cameraX % 45), CHAO + 27, 8, 3, 0, 0, Math.PI * 2);
         ctx.fill();
     }
 }
 
 function desenharObstaculos() {
-    for (const o of obstaculos) {
+    obstaculos.forEach(o => {
         const x = o.x - cameraX;
         const y = CHAO - o.h;
 
-        if (x < -100 || x > LARGURA + 100) continue;
+        if (x < -100 || x > W + 100) return;
 
-        // Sombra
-        ctx.fillStyle = "rgba(90, 49, 98, 0.16)";
+        ctx.fillStyle = "rgba(90,49,98,0.16)";
         ctx.beginPath();
         ctx.ellipse(x + o.w / 2, CHAO + 2, o.w * 0.55, 5, 0, 0, Math.PI * 2);
         ctx.fill();
 
         if (o.tipo === "coagulo") {
-            // Obstáculo parecido com um coágulo
             ctx.fillStyle = "#c73e6d";
-
             ctx.beginPath();
             ctx.arc(x + o.w * 0.28, y + o.h * 0.56, o.h * 0.35, 0, Math.PI * 2);
             ctx.arc(x + o.w * 0.52, y + o.h * 0.36, o.h * 0.39, 0, Math.PI * 2);
@@ -830,13 +498,7 @@ function desenharObstaculos() {
             ctx.beginPath();
             ctx.arc(x + o.w * 0.42, y + o.h * 0.32, 4, 0, Math.PI * 2);
             ctx.fill();
-
-            ctx.fillStyle = "#8f2851";
-            ctx.beginPath();
-            ctx.arc(x + o.w * 0.68, y + o.h * 0.65, 3, 0, Math.PI * 2);
-            ctx.fill();
         } else {
-            // Obstáculo parecido com uma pedra
             ctx.fillStyle = "#8d78ae";
             ctx.beginPath();
             ctx.moveTo(x + 2, CHAO);
@@ -856,22 +518,18 @@ function desenharObstaculos() {
             ctx.closePath();
             ctx.fill();
         }
-    }
+    });
 }
 
 function desenharPerguntas() {
-    for (let i = 0; i < TOTAL_PERGUNTAS; i++) {
+    for (let i = 0; i < TOTAL; i++) {
         const x = posicoesPerguntas[i] - cameraX;
         const y = CHAO - 115;
 
-        if (x < -60 || x > LARGURA + 60) continue;
+        if (x < -60 || x > W + 60) continue;
 
-        const respondida = i < indicePergunta;
-
-        ctx.save();
-
-        ctx.fillStyle = respondida ? "#a9e6c4" : "#fff5b5";
-        ctx.strokeStyle = respondida ? "#55b985" : "#e7a63d";
+        ctx.fillStyle = i < indicePergunta ? "#a9e6c4" : "#fff5b5";
+        ctx.strokeStyle = i < indicePergunta ? "#55b985" : "#e7a63d";
         ctx.lineWidth = 3;
 
         ctx.beginPath();
@@ -883,20 +541,15 @@ function desenharPerguntas() {
         ctx.font = "bold 23px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(respondida ? "✓" : "?", x, y + 1);
-
-        ctx.restore();
+        ctx.fillText(i < indicePergunta ? "✓" : "?", x, y + 1);
     }
 }
-
-const posicoesPerguntas = [350, 790, 1250, 1690, 2020];
 
 function desenharJogador() {
     const x = jogador.x - cameraX;
     const y = jogador.y;
-
     const andando = Math.abs(jogador.vx) > 0.2 && jogador.noChao;
-    const balanco = andando ? Math.sin(tempoAnimacao * 0.22) * 3 : 0;
+    const balanco = andando ? Math.sin(tempo * 0.22) * 3 : 0;
 
     ctx.save();
 
@@ -904,38 +557,30 @@ function desenharJogador() {
         ctx.globalAlpha = 0.45;
     }
 
-    // Sombra do personagem
-    ctx.fillStyle = "rgba(95, 51, 110, 0.2)";
+    ctx.fillStyle = "rgba(95,51,110,0.2)";
     ctx.beginPath();
     ctx.ellipse(x + jogador.w / 2, CHAO + 2, 19, 5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Perninhas
     ctx.strokeStyle = "#754a86";
     ctx.lineWidth = 5;
     ctx.lineCap = "round";
-
     ctx.beginPath();
     ctx.moveTo(x + 12, y + 32);
     ctx.lineTo(x + 10 + balanco, y + 41);
-
     ctx.moveTo(x + 23, y + 32);
     ctx.lineTo(x + 24 - balanco, y + 41);
     ctx.stroke();
 
-    // Braços
     ctx.strokeStyle = "#ffb6c9";
     ctx.lineWidth = 6;
-
     ctx.beginPath();
     ctx.moveTo(x + 5, y + 18);
     ctx.lineTo(x + 1, y + 26 + balanco);
-
     ctx.moveTo(x + 29, y + 18);
     ctx.lineTo(x + 33, y + 25 - balanco);
     ctx.stroke();
 
-    // Corpo
     const corpo = ctx.createLinearGradient(x, y + 12, x + jogador.w, y + 35);
     corpo.addColorStop(0, "#ff8fb8");
     corpo.addColorStop(1, "#e65c9c");
@@ -945,42 +590,35 @@ function desenharJogador() {
     ctx.roundRect(x + 5, y + 12, 24, 23, 9);
     ctx.fill();
 
-    // Cabeça
     ctx.fillStyle = "#ffd7bd";
     ctx.beginPath();
     ctx.arc(x + 17, y + 10, 14, 0, Math.PI * 2);
     ctx.fill();
 
-    // Cabelo
     ctx.fillStyle = "#74486f";
     ctx.beginPath();
     ctx.arc(x + 16, y + 6, 14, Math.PI, Math.PI * 2);
     ctx.lineTo(x + 30, y + 13);
-    ctx.quadraticCurveTo(x + 25, y + 4, x + 23, y + 5);
     ctx.fill();
 
-    // Olhos
     ctx.fillStyle = "#4e3659";
     ctx.beginPath();
     ctx.arc(x + 12, y + 11, 1.8, 0, Math.PI * 2);
     ctx.arc(x + 22, y + 11, 1.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // Bochechas
     ctx.fillStyle = "#f69bb1";
     ctx.beginPath();
     ctx.arc(x + 8, y + 16, 3, 0, Math.PI * 2);
     ctx.arc(x + 26, y + 16, 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Sorriso
     ctx.strokeStyle = "#9e536f";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(x + 17, y + 15, 4, 0.15, Math.PI - 0.15);
     ctx.stroke();
 
-    // Coração na roupa
     ctx.font = "12px Arial";
     ctx.textAlign = "center";
     ctx.fillText("♥", x + 17, y + 27);
@@ -989,30 +627,23 @@ function desenharJogador() {
 }
 
 function desenharProgresso() {
-    const larguraBarra = 210;
-    const alturaBarra = 10;
-    const progresso = Math.min(indicePergunta / TOTAL_PERGUNTAS, 1);
+    const largura = 210;
+    const progresso = indicePergunta / TOTAL;
 
-    ctx.fillStyle = "rgba(255,255,255,0.8)";
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
     ctx.beginPath();
-    ctx.roundRect(LARGURA - larguraBarra - 20, 18, larguraBarra, 25, 12);
+    ctx.roundRect(W - largura - 20, 18, largura, 25, 12);
     ctx.fill();
 
     ctx.fillStyle = "#e9c4f7";
     ctx.beginPath();
-    ctx.roundRect(LARGURA - larguraBarra - 12, 25, larguraBarra - 16, alturaBarra, 6);
+    ctx.roundRect(W - largura - 12, 25, largura - 16, 10, 6);
     ctx.fill();
 
     if (progresso > 0) {
         ctx.fillStyle = "#e85e9e";
         ctx.beginPath();
-        ctx.roundRect(
-            LARGURA - larguraBarra - 12,
-            25,
-            (larguraBarra - 16) * progresso,
-            alturaBarra,
-            6
-        );
+        ctx.roundRect(W - largura - 12, 25, (largura - 16) * progresso, 10, 6);
         ctx.fill();
     }
 
@@ -1020,6 +651,26 @@ function desenharProgresso() {
     ctx.font = "bold 12px Arial";
     ctx.textAlign = "left";
     ctx.fillText("AVENTURA PELO CORAÇÃO", 18, 25);
+}
+
+function desenharParticulas() {
+    for (let i = particulas.length - 1; i >= 0; i--) {
+        const p = particulas[i];
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.12;
+        p.vida--;
+
+        ctx.globalAlpha = Math.max(0, p.vida / 40);
+        ctx.fillStyle = p.cor;
+        ctx.beginPath();
+        ctx.arc(p.x - cameraX, p.y, p.tamanho, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        if (p.vida <= 0) particulas.splice(i, 1);
+    }
 }
 
 function desenhar() {
@@ -1032,106 +683,63 @@ function desenhar() {
     desenharProgresso();
 }
 
-// ==========================================
-// FÍSICA E COLISÕES
-// ==========================================
+/* ---------- Física ---------- */
 
 function atualizar() {
     if (jogoPausado || jogoFinalizado) return;
 
-    tempoAnimacao++;
+    tempo++;
 
-    if (jogador.invulneravel > 0) {
-        jogador.invulneravel--;
-    }
+    if (jogador.invulneravel > 0) jogador.invulneravel--;
 
     const anteriorX = jogador.x;
-    const anteriorY = jogador.y;
-    const anteriorBase = anteriorY + jogador.h;
+    const anteriorBase = jogador.y + jogador.h;
 
     let movimento = 0;
 
-    if (teclas.ArrowLeft || teclas.a || teclas.A || teclas.esquerda) {
-        movimento -= 1;
-    }
+    if (teclas.esquerda) movimento--;
+    if (teclas.direita) movimento++;
 
-    if (teclas.ArrowRight || teclas.d || teclas.D || teclas.direita) {
-        movimento += 1;
-    }
-
-    jogador.vx = movimento * VELOCIDADE;
-
-    if (movimento !== 0) {
-        jogador.olhando = movimento;
-    }
-
+    jogador.vx = movimento * 4.2;
     jogador.x += jogador.vx;
     jogador.x = Math.max(0, Math.min(MUNDO - jogador.w, jogador.x));
 
-    // Gravidade
-    jogador.vy += GRAVIDADE;
+    jogador.vy += 0.58;
     jogador.y += jogador.vy;
-
     jogador.noChao = false;
 
-    // Colisão com o chão
     if (jogador.y + jogador.h >= CHAO) {
         jogador.y = CHAO - jogador.h;
         jogador.vy = 0;
         jogador.noChao = true;
     }
 
-    // Colisões com obstáculos
     for (const o of obstaculos) {
-        const esquerdaO = o.x;
-        const direitaO = o.x + o.w;
-        const topoO = CHAO - o.h;
+        const topo = CHAO - o.h;
+        const horizontal = jogador.x + jogador.w > o.x && jogador.x < o.x + o.w;
+        const vertical = jogador.y + jogador.h > topo && jogador.y < CHAO;
 
-        const sobrepoeHorizontal =
-            jogador.x + jogador.w > esquerdaO &&
-            jogador.x < direitaO;
+        if (!horizontal || !vertical) continue;
 
-        const sobrepoeVertical =
-            jogador.y + jogador.h > topoO &&
-            jogador.y < CHAO;
-
-        if (!sobrepoeHorizontal || !sobrepoeVertical) continue;
-
-        // Caiu em cima do obstáculo
-        if (
-            anteriorBase <= topoO + 10 &&
-            jogador.vy >= 0
-        ) {
-            jogador.y = topoO - jogador.h;
+        if (anteriorBase <= topo + 10 && jogador.vy >= 0) {
+            jogador.y = topo - jogador.h;
             jogador.vy = 0;
             jogador.noChao = true;
         } else {
-            // Bateu na lateral: volta para antes da colisão
-            if (anteriorX + jogador.w <= esquerdaO) {
-                jogador.x = esquerdaO - jogador.w;
-            } else if (anteriorX >= direitaO) {
-                jogador.x = direitaO;
-            } else {
-                jogador.x = anteriorX;
+            if (anteriorX + jogador.w <= o.x) {
+                jogador.x = o.x - jogador.w;
+            } else if (anteriorX >= o.x + o.w) {
+                jogador.x = o.x + o.w;
             }
 
-            // Perde vida ao encostar no obstáculo
-            if (jogador.invulneravel <= 0) {
-                perderVida();
-            }
+            if (jogador.invulneravel <= 0) perderVida();
         }
     }
 
-    // Evita sair dos limites do mundo
-    jogador.x = Math.max(0, Math.min(MUNDO - jogador.w, jogador.x));
+    cameraX = Math.max(0, Math.min(MUNDO - W, jogador.x - W * 0.32));
 
-    // Câmera acompanha o personagem
-    cameraX = jogador.x - LARGURA * 0.32;
-    cameraX = Math.max(0, Math.min(MUNDO - LARGURA, cameraX));
-
-    // Detecta chegada à pergunta
     if (
-        indicePergunta < TOTAL_PERGUNTAS &&
+        indicePergunta < TOTAL &&
         jogador.x + jogador.w >= posicoesPerguntas[indicePergunta]
     ) {
         abrirPergunta();
@@ -1141,162 +749,112 @@ function atualizar() {
 }
 
 function pular() {
-    if (!jogoRodando || jogoPausado || jogoFinalizado) return;
+    if (jogoPausado || jogoFinalizado || !jogador.noChao) return;
 
-    if (jogador.noChao) {
-        jogador.vy = FORCA_PULO;
-        jogador.noChao = false;
-        criarParticulas(jogador.x + jogador.w / 2, jogador.y + jogador.h, "#ffffff", 7);
-    }
+    jogador.vy = -12.5;
+    jogador.noChao = false;
+
+    criarParticulas(jogador.x + jogador.w / 2, jogador.y + jogador.h, "#ffffff", 7);
 }
 
 function perderVida() {
-    if (jogador.invulneravel > 0 || jogoPausado) return;
+    if (jogador.invulneravel > 0 || jogoPausado || jogoFinalizado) return;
 
     vidas--;
     jogador.invulneravel = 75;
     jogador.vy = -5;
 
     criarParticulas(jogador.x + jogador.w / 2, jogador.y + jogador.h / 2, "#ff5f87", 12);
-
     atualizarPainel();
 
-    if (vidas <= 0) {
-        finalizarJogo(false);
-    }
+    if (vidas <= 0) finalizarJogo(false);
 }
 
-// ==========================================
-// PERGUNTAS E RESPOSTAS
-// ==========================================
+/* ---------- Perguntas ---------- */
 
 function abrirPergunta() {
     if (jogoPausado || jogoFinalizado) return;
 
     jogoPausado = true;
+    respostaFeita = false;
 
-    const questao = perguntasDaPartida[indicePergunta];
+    const questao = perguntas[indicePergunta];
 
-    if (!questao) {
-        finalizarJogo(true);
-        return;
-    }
+    $("tituloPergunta").textContent = `Pergunta ${indicePergunta + 1} de ${TOTAL}`;
+    $("textoPergunta").textContent = questao.pergunta;
+    $("feedback").textContent = "";
+    $("feedback").className = "feedback";
+    $("opcoes").replaceChildren();
 
-    if (tituloPergunta) {
-        tituloPergunta.textContent = `Pergunta ${indicePergunta + 1} de ${TOTAL_PERGUNTAS}`;
-    }
+    questao.opcoes.forEach((opcao, i) => {
+        const botao = document.createElement("button");
 
-    if (textoPergunta) {
-        textoPergunta.textContent = questao.pergunta;
-    }
+        botao.type = "button";
+        botao.className = "opcao-resposta";
+        botao.textContent = `${String.fromCharCode(65 + i)}. ${opcao}`;
+        botao.addEventListener("click", () => responderPergunta(i));
 
-    if (opcoes) {
-        opcoes.innerHTML = "";
-
-        questao.opcoes.forEach((opcao, i) => {
-            const botao = document.createElement("button");
-
-            botao.type = "button";
-            botao.className = "opcao-resposta";
-            botao.textContent = `${String.fromCharCode(65 + i)}. ${opcao}`;
-
-            botao.addEventListener("click", () => responderPergunta(i));
-
-            opcoes.appendChild(botao);
-        });
-    }
-
-    if (feedback) {
-        feedback.textContent = "";
-        feedback.className = "";
-    }
+        $("opcoes").appendChild(botao);
+    });
 
     mostrar(perguntaTela);
 }
 
-function responderPergunta(indiceEscolhido) {
-    if (!jogoPausado || jogoFinalizado) return;
+function responderPergunta(escolhida) {
+    if (!jogoPausado || jogoFinalizado || respostaFeita) return;
 
-    const questao = perguntasDaPartida[indicePergunta];
+    const questao = perguntas[indicePergunta];
+    const acertou = escolhida === questao.correta;
 
-    if (!questao) return;
+    respostaFeita = true;
 
-    const acertou = indiceEscolhido === questao.correta;
+    $("opcoes").querySelectorAll("button").forEach((botao, i) => {
+        botao.disabled = true;
 
-    ultimaResposta = acertou;
-
-    if (opcoes) {
-        const botoes = opcoes.querySelectorAll("button");
-
-        botoes.forEach((botao, i) => {
-            botao.disabled = true;
-
-            if (i === questao.correta) {
-                botao.classList.add("correta");
-            } else if (i === indiceEscolhido && !acertou) {
-                botao.classList.add("incorreta");
-            }
-        });
-    }
+        if (i === questao.correta) {
+            botao.classList.add("correta");
+        } else if (i === escolhida) {
+            botao.classList.add("incorreta");
+        }
+    });
 
     if (acertou) {
         pontos += 100;
-        respostasCorretas++;
+        acertos++;
 
-        if (feedback) {
-            feedback.textContent = `Muito bem! 💗 ${questao.explicacao}`;
-            feedback.className = "feedback-correto";
-        }
+        $("feedback").textContent = `Muito bem! 💗 ${questao.explicacao}`;
+        $("feedback").className = "feedback feedback-correto";
 
         criarParticulas(jogador.x + 15, jogador.y, "#ff70ad", 18);
     } else {
-        respostasErradas++;
+        erros++;
 
-        if (feedback) {
-            feedback.textContent =
-                `Quase! A resposta certa é: ${questao.opcoes[questao.correta]}. ${questao.explicacao}`;
-            feedback.className = "feedback-errado";
-        }
+        $("feedback").textContent =
+            `Quase! A resposta certa é: ${questao.opcoes[questao.correta]}. ${questao.explicacao}`;
+        $("feedback").className = "feedback feedback-errado";
     }
-
-    historicoRespostas.push({
-        pergunta: questao.pergunta,
-        acertou
-    });
 
     atualizarPainel();
-
-    // O mesmo botão pode funcionar como "continuar"
-    const botoes = opcoes?.querySelectorAll("button");
-
-    if (botoes) {
-        const continuar = document.createElement("button");
-
-        continuar.type = "button";
-        continuar.className = "botao-continuar";
-        continuar.textContent =
-            indicePergunta + 1 >= TOTAL_PERGUNTAS
-                ? "Ver resultado ✨"
-                : "Continuar ➜";
-
-        continuar.addEventListener("click", continuarAventura);
-        opcoes.appendChild(continuar);
-    }
 }
 
 function continuarAventura() {
+    if (perguntaTela.classList.contains("escondido")) return;
+
+    if (!respostaFeita) {
+        $("feedback").textContent = "Escolha uma resposta antes de continuar! 💗";
+        $("feedback").className = "feedback feedback-errado";
+        return;
+    }
+
     esconder(perguntaTela);
-
     indicePergunta++;
-
     atualizarPainel();
 
-    if (indicePergunta >= TOTAL_PERGUNTAS) {
+    if (indicePergunta >= TOTAL) {
         finalizarJogo(true);
         return;
     }
 
-    // Mantém o personagem depois do ponto da pergunta já respondida
     jogador.x = Math.max(jogador.x, posicoesPerguntas[indicePergunta - 1] + 35);
     jogador.vy = 0;
 
@@ -1304,124 +862,143 @@ function continuarAventura() {
         jogador.y = CHAO - jogador.h;
     }
 
+    respostaFeita = false;
     jogoPausado = false;
 }
 
-// ==========================================
-// RESULTADO E RANKING
-// ==========================================
+/* ---------- Resultado e gravação ---------- */
+
+function criarIdPartida() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+    }
+
+    return `partida_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
 
 function finalizarJogo(venceu) {
+    if (jogoFinalizado) return;
+
     jogoFinalizado = true;
     jogoPausado = true;
-    jogoRodando = false;
-
     esconder(perguntaTela);
-    esconder(mensagem);
 
-    if (tituloResultado) {
-        tituloResultado.textContent = venceu
-            ? "Aventura concluída! 💖"
-            : "Fim da aventura 💗";
+    $("tituloResultado").textContent = venceu
+        ? "Aventura concluída! 💖"
+        : "Fim da aventura 💗";
+
+    $("resumo").textContent = venceu
+        ? `Parabéns, ${nomeJogador}! Você concluiu a aventura.`
+        : `${nomeJogador}, você ficou sem vidas. Tente novamente para melhorar sua pontuação!`;
+
+    $("pontuacaoFinal").textContent = `Pontuação: ${pontos}`;
+
+    const detalhes = $("detalhesPartida");
+    detalhes.replaceChildren();
+
+    [
+        `✅ Respostas corretas: ${acertos}`,
+        `❌ Respostas incorretas: ${erros}`,
+        `❤️ Vidas restantes: ${vidas}`,
+        `📚 Perguntas respondidas: ${Math.min(indicePergunta + 1, TOTAL)}/${TOTAL}`
+    ].forEach(texto => {
+        const p = document.createElement("p");
+        p.textContent = texto;
+        detalhes.appendChild(p);
+    });
+
+    if (!partidaSalva) {
+        partidaSalva = true;
+
+        guardarPartida({
+            id: criarIdPartida(),
+            nome: nomeJogador,
+            pontos,
+            acertos,
+            erros,
+            data: new Date().toLocaleDateString("pt-BR")
+        });
     }
-
-    if (resumo) {
-        resumo.textContent = venceu
-            ? `Parabéns, ${nomeJogador}! Você chegou ao final da sua aventura.`
-            : `${nomeJogador}, você ficou sem vidas. Tente novamente para melhorar sua pontuação!`;
-    }
-
-    if (pontuacaoFinal) {
-        pontuacaoFinal.textContent = `Pontuação: ${pontos}`;
-    }
-
-    if (detalhesPartida) {
-        detalhesPartida.innerHTML = `
-            <p>✅ Respostas corretas: <strong>${respostasCorretas}</strong></p>
-            <p>❌ Respostas incorretas: <strong>${respostasErradas}</strong></p>
-            <p>❤️ Vidas restantes: <strong>${vidas}</strong></p>
-            <p>📚 Perguntas respondidas: <strong>${historicoRespostas.length}/${TOTAL_PERGUNTAS}</strong></p>
-        `;
-    }
-
-    salvarRanking();
 
     mostrar(resultado);
 }
 
-function obterRanking() {
-    try {
-        const dados = localStorage.getItem("rankingCoracao");
-        return dados ? JSON.parse(dados) : [];
-    } catch (erro) {
-        console.error("Não foi possível ler o ranking:", erro);
-        return [];
-    }
-}
+/* ---------- Ranking ---------- */
 
-function salvarRanking() {
-    const ranking = obterRanking();
+function mostrarRanking() {
+    const lista = $("listaRanking");
+    const status = $("statusRanking");
 
-    ranking.push({
-        nome: nomeJogador,
-        pontos,
-        acertos: respostasCorretas,
-        data: new Date().toLocaleDateString("pt-BR")
-    });
+    lista.replaceChildren();
 
-    ranking.sort((a, b) => b.pontos - a.pontos);
+    const ranking = lerDados(CHAVE_RANKING)
+        .sort((a, b) => b.pontos - a.pontos);
 
-    try {
-        localStorage.setItem("rankingCoracao", JSON.stringify(ranking.slice(0, 10)));
-    } catch (erro) {
-        console.error("Não foi possível salvar o ranking:", erro);
-    }
-}
-
-function abrirRanking() {
-    esconder(resultado);
-    esconder(cadastro);
-    esconder(informacoes);
-    esconder(perguntaTela);
-    mostrar(rankingTela);
-
-    renderizarRanking();
-}
-
-function renderizarRanking() {
-    if (!listaRanking) return;
-
-    const ranking = obterRanking();
-
-    listaRanking.innerHTML = "";
+    status.textContent = "Partidas guardadas neste navegador.";
 
     if (ranking.length === 0) {
-        listaRanking.innerHTML = "<p>Ainda não há partidas registradas. Seja a primeira pessoa a jogar! 💗</p>";
+        const vazio = document.createElement("p");
+        vazio.className = "ranking-vazio";
+        vazio.textContent = "Ainda não existem partidas registradas. Seja o primeiro a jogar! 💗";
+        lista.appendChild(vazio);
         return;
     }
 
-    ranking.forEach((jogadorRanking, indice) => {
+    ranking.forEach((jogador, indice) => {
         const item = document.createElement("div");
         item.className = "item-ranking";
 
-        const medalha = ["🥇", "🥈", "🥉"][indice] || "🏅";
-
         const nome = document.createElement("strong");
-        nome.textContent = `${medalha} ${indice + 1}º — ${jogadorRanking.nome}`;
+        const medalhas = ["🥇", "🥈", "🥉"];
+        nome.textContent = `${medalhas[indice] || "🏅"} ${indice + 1}º — ${jogador.nome}`;
 
-        const pontuacao = document.createElement("span");
-        pontuacao.textContent = `${jogadorRanking.pontos} pontos`;
+        const pontos = document.createElement("span");
+        pontos.textContent = `${jogador.pontos} pontos`;
 
         const data = document.createElement("small");
-        data.textContent = jogadorRanking.data || "";
+        data.textContent = jogador.data || "";
 
-        item.append(nome, pontuacao, data);
-        listaRanking.appendChild(item);
+        item.append(nome, pontos, data);
+        lista.appendChild(item);
     });
 }
 
+function abrirRanking(origem = "resultado") {
+    telaAnteriorRanking = origem;
+
+    esconder(cadastro);
+    esconder(informacoes);
+    esconder(perguntaTela);
+    esconder(resultado);
+
+    esconder($("voltarResultado"));
+    if (origem === "resultado") mostrar($("voltarResultado"));
+
+    mostrar(rankingTela);
+    mostrarRanking();
+}
+
+function voltarDoRanking() {
+    esconder(rankingTela);
+
+    if (telaAnteriorRanking === "resultado") {
+        mostrar(resultado);
+    } else {
+        novoJogador();
+    }
+}
+
+function limparRanking() {
+    if (!confirm("Apagar o ranking e o histórico de partidas deste navegador?")) {
+        return;
+    }
+
+    localStorage.removeItem(CHAVE_RANKING);
+    localStorage.removeItem(CHAVE_PARTIDAS);
+    mostrarRanking();
+}
+
 function novoJogador() {
-    jogoRodando = false;
     jogoPausado = true;
     jogoFinalizado = false;
 
@@ -1431,141 +1008,103 @@ function novoJogador() {
     esconder(perguntaTela);
     mostrar(cadastro);
 
-    if (nomeJogadorInput) {
-        nomeJogadorInput.value = "";
-        nomeJogadorInput.focus();
-    }
+    nomeInput.value = "";
+    nomeInput.focus();
 }
 
-function limparRanking() {
-    const confirmar = confirm("Tem certeza de que deseja apagar todo o ranking deste navegador?");
+/* ---------- Controles ---------- */
 
-    if (!confirmar) return;
-
-    localStorage.removeItem("rankingCoracao");
-    renderizarRanking();
-}
-
-// ==========================================
-// LOOP DO JOGO
-// ==========================================
-
-function loopJogo() {
-    if (!jogoRodando) return;
-
-    atualizar();
-    desenhar();
-
-    if (jogoRodando) {
-        requestAnimationFrame(loopJogo);
-    }
-}
-
-// ==========================================
-// CONTROLES DO TECLADO
-// ==========================================
-
-document.addEventListener("keydown", (evento) => {
-    teclas[evento.key] = true;
-
-    if (
-        ["ArrowLeft", "ArrowRight", "ArrowUp", " "].includes(evento.key)
-    ) {
-        evento.preventDefault();
-    }
-
-    if (
-        evento.key === "ArrowUp" ||
-        evento.key === " " ||
-        evento.key === "w" ||
-        evento.key === "W"
-    ) {
-        pular();
-    }
-});
-
-document.addEventListener("keyup", (evento) => {
-    teclas[evento.key] = false;
-});
-
-// ==========================================
-// CONTROLES PARA CELULAR
-// ==========================================
-
-function configurarBotaoSegurar(botao, tecla) {
-    if (!botao) return;
-
-    const pressionar = (evento) => {
-        evento.preventDefault();
-        teclas[tecla] = true;
-    };
-
-    const soltar = (evento) => {
-        evento.preventDefault();
+function limparTeclas() {
+    Object.keys(teclas).forEach(tecla => {
         teclas[tecla] = false;
-    };
-
-    botao.addEventListener("pointerdown", pressionar);
-    botao.addEventListener("pointerup", soltar);
-    botao.addEventListener("pointerleave", soltar);
-    botao.addEventListener("pointercancel", soltar);
-}
-
-configurarBotaoSegurar(btnEsquerda, "esquerda");
-configurarBotaoSegurar(btnDireita, "direita");
-
-if (btnPular) {
-    btnPular.addEventListener("pointerdown", (evento) => {
-        evento.preventDefault();
-        pular();
     });
 }
 
-// ==========================================
-// BOTÕES DO HTML
-// ==========================================
+document.addEventListener("keydown", evento => {
+    const tecla = evento.key;
 
-btnComecar?.addEventListener("click", iniciarJogo);
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", " "].includes(tecla)) {
+        evento.preventDefault();
+    }
 
-nomeJogadorInput?.addEventListener("keydown", (evento) => {
-    if (evento.key === "Enter") {
-        iniciarJogo();
+    if (tecla === "ArrowLeft" || tecla.toLowerCase() === "a") {
+        teclas.esquerda = true;
+    }
+
+    if (tecla === "ArrowRight" || tecla.toLowerCase() === "d") {
+        teclas.direita = true;
+    }
+
+    if (tecla === "ArrowUp" || tecla === " " || tecla.toLowerCase() === "w") {
+        pular();
     }
 });
 
-btnProximo?.addEventListener("click", novoJogador);
-btnVerRanking?.addEventListener("click", abrirRanking);
-btnNovoJogador?.addEventListener("click", novoJogador);
-btnLimparRanking?.addEventListener("click", limparRanking);
+document.addEventListener("keyup", evento => {
+    const tecla = evento.key;
 
-// ==========================================
-// FUNÇÕES AUXILIARES
-// ==========================================
-
-function mostrar(elemento) {
-    if (elemento) {
-        elemento.classList.remove("escondido");
-        elemento.style.display = "";
+    if (tecla === "ArrowLeft" || tecla.toLowerCase() === "a") {
+        teclas.esquerda = false;
     }
+
+    if (tecla === "ArrowRight" || tecla.toLowerCase() === "d") {
+        teclas.direita = false;
+    }
+});
+
+window.addEventListener("blur", limparTeclas);
+
+function configurarBotaoMovimento(id, direcao) {
+    const botao = $(id);
+
+    botao.addEventListener("pointerdown", evento => {
+        evento.preventDefault();
+        teclas[direcao] = true;
+
+        if (botao.setPointerCapture) {
+            botao.setPointerCapture(evento.pointerId);
+        }
+    });
+
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(tipo => {
+        botao.addEventListener(tipo, () => {
+            teclas[direcao] = false;
+        });
+    });
 }
 
-function esconder(elemento) {
-    if (elemento) {
-        elemento.classList.add("escondido");
-        elemento.style.display = "none";
-    }
+configurarBotaoMovimento("esquerda", "esquerda");
+configurarBotaoMovimento("direita", "direita");
+
+$("pular").addEventListener("pointerdown", evento => {
+    evento.preventDefault();
+    pular();
+});
+
+$("formCadastro").addEventListener("submit", iniciarJogo);
+$("proximo").addEventListener("click", continuarAventura);
+$("btnResultadoNovo").addEventListener("click", novoJogador);
+$("btnResultadoRanking").addEventListener("click", () => abrirRanking("resultado"));
+$("novoJogador").addEventListener("click", novoJogador);
+$("limparRanking").addEventListener("click", limparRanking);
+$("voltarResultado").addEventListener("click", voltarDoRanking);
+
+/* ---------- Loop do jogo ---------- */
+
+function loopJogo() {
+    atualizar();
+    desenhar();
+    requestAnimationFrame(loopJogo);
 }
 
-// ==========================================
-// PREPARAÇÃO DA TELA
-// ==========================================
+function prepararJogo() {
+    criarDecoracoes();
+    esconder(informacoes);
+    esconder(perguntaTela);
+    esconder(resultado);
+    esconder(rankingTela);
+    desenhar();
+}
 
-criarDecoracoes();
-
-esconder(informacoes);
-esconder(perguntaTela);
-esconder(resultado);
-esconder(rankingTela);
-
-// Desenha o cenário antes de começar
-desenhar();
+prepararJogo();
+loopJogo();

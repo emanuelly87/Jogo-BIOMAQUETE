@@ -2,96 +2,118 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#c9184a">
-  <title>Aventura pelo Coração</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura pelo Coração 💗</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>❤️ Aventura pelo Coração</h1>
-    <p>Uma aventura pelo sistema cardiovascular</p>
-  </header>
+    <header class="cabecalho">
+        <h1>💗 Aventura pelo Coração</h1>
+        <p>Uma jornada divertida pelo sistema cardiovascular!</p>
+    </header>
 
-  <main>
-    <section id="cadastro" class="painel cadastro">
-      <h2>🩸 Quem vai jogar?</h2>
-      <input id="nomeJogador" maxlength="30"
-        placeholder="Digite seu nome" autocomplete="off">
-      <button id="comecar">Começar aventura</button>
+    <main class="container">
+        <section id="cadastro" class="painel cadastro">
+            <div class="icone-grande">💗</div>
+            <h2>Vamos começar a aventura?</h2>
+            <p>Digite seu nome e prepare-se para aprender brincando.</p>
 
-      <div class="instrucoes">
-        <h3>📖 Como jogar</h3>
-        <p>🩸 Você controla uma hemácia pelo sistema circulatório.</p>
-        <p>➡️ Use as setas para andar.</p>
-        <p>⬆️ Pule com a seta para cima ou a barra de espaço.</p>
-        <p>📱 No celular, use os botões que aparecem durante o jogo.</p>
-        <p>❓ Ao encontrar uma pergunta, escolha uma resposta para continuar.</p>
-        <p>⭐ Resposta correta: +100 pontos.</p>
-        <p>🟡 Resposta parcialmente correta: +50 pontos.</p>
-        <p>❤️ Resposta incorreta: −25 pontos e perde uma vida.</p>
-        <p>🏆 No final, confira sua pontuação no ranking!</p>
-      </div>
-    </section>
+            <form id="formCadastro">
+                <label for="nomeJogador">Nome do jogador</label>
+                <input id="nomeJogador" type="text" maxlength="24"
+                    placeholder="Digite seu nome..." required>
+                <button class="botao-principal" type="submit">
+                    Começar aventura
+                </button>
+            </form>
+        </section>
 
-    <section id="informacoes" class="painel informacoes escondido">
-      <span>🧑 <b id="nomeAtual"></b></span>
-      <span>❤️ Vidas: <b id="vidas">3</b></span>
-      <span>⭐ Pontos: <b id="pontos">0</b></span>
-      <span>📍 <b id="fase">Coração direito</b></span>
-    </section>
+        <section id="informacoes" class="painel informacoes escondido">
+            <div class="info-item">
+                <span>Jogador</span>
+                <strong id="nomeAtual">—</strong>
+            </div>
+            <div class="info-item">
+                <span>Vidas</span>
+                <strong id="vidas">❤️❤️❤️</strong>
+            </div>
+            <div class="info-item">
+                <span>Pontos</span>
+                <strong id="pontos">0</strong>
+            </div>
+            <div class="info-item">
+                <span>Pergunta</span>
+                <strong id="fase">0/5</strong>
+            </div>
+        </section>
 
-    <section class="jogo" aria-label="Jogo de plataforma">
-      <canvas id="game" width="900" height="450">
-        Seu navegador não suporta o jogo.
-      </canvas>
+        <section class="jogo-painel">
+            <canvas id="game" width="900" height="450"
+                aria-label="Jogo Aventura pelo Coração"></canvas>
+            <div class="instrucoes">
+                <span>⬅️ ➡️ Mover</span>
+                <span>⬆️ ou Espaço: pular</span>
+                <span>Desvie dos obstáculos!</span>
+            </div>
 
-      <div id="mensagem" class="tela escondido">
-        <h2>🫀 Sua missão</h2>
-        <p>Percorra o coração, os pulmões e o corpo humano!</p>
-        <button id="iniciarDoPainel">Jogar</button>
-      </div>
+            <div class="controles">
+                <button id="esquerda" type="button" aria-label="Mover para esquerda">◀</button>
+                <button id="pular" type="button" aria-label="Pular">⬆ Pular</button>
+                <button id="direita" type="button" aria-label="Mover para direita">▶</button>
+            </div>
+        </section>
 
-      <div id="pergunta" class="tela escondido">
-        <h2 id="tituloPergunta"></h2>
-        <p id="textoPergunta"></p>
-        <div id="opcoes"></div>
-        <p id="feedback" aria-live="polite"></p>
-        <button id="proximo" disabled>Continuar aventura</button>
-      </div>
+        <section id="pergunta" class="painel pergunta-painel escondido">
+            <span class="etiqueta">DESAFIO DO CORAÇÃO 💗</span>
+            <h2 id="tituloPergunta">Pergunta 1 de 5</h2>
+            <p id="textoPergunta"></p>
+            <div id="opcoes" class="opcoes"></div>
+            <p id="feedback" class="feedback" aria-live="polite"></p>
 
-      <div id="resultado" class="tela escondido">
-        <h2 id="tituloResultado"></h2>
-        <p id="resumo"></p>
-        <h3 id="pontuacaoFinal"></h3>
-        <div id="detalhesPartida"></div>
-        <button id="verRanking">Ver ranking</button>
-        <button id="proximoJogador">Próximo jogador</button>
-      </div>
+            <button id="proximo" class="botao-principal" type="button">
+                Continuar aventura 💗
+            </button>
+        </section>
 
-      <div id="rankingTela" class="tela escondido">
-        <h2>🏆 Ranking dos jogadores</h2>
-        <p>Partidas registradas neste navegador.</p>
-        <ol id="listaRanking"></ol>
-        <button id="novoJogador">Novo jogador</button>
-        <button id="limparRanking">Limpar ranking</button>
-      </div>
-    </section>
+        <section id="resultado" class="painel escondido">
+            <div class="icone-grande">🏆</div>
+            <h2 id="tituloResultado">Aventura concluída!</h2>
+            <p id="resumo"></p>
+            <p id="pontuacaoFinal" class="pontuacao-final"></p>
+            <div id="detalhesPartida" class="detalhes-partida"></div>
+            <button id="btnResultadoNovo" class="botao-principal" type="button">
+                Novo jogador
+            </button>
+            <button id="btnResultadoRanking" class="botao-secundario" type="button">
+                Ver ranking
+            </button>
+        </section>
 
-    <section id="controles" class="controles escondido">
-      <div class="botoes-move">
-        <button id="esquerda" aria-label="Mover para esquerda">◀</button>
-        <button id="pular" aria-label="Pular">⬆ PULAR</button>
-        <button id="direita" aria-label="Mover para direita">▶</button>
-      </div>
-    </section>
-  </main>
+        <section id="rankingTela" class="painel escondido">
+            <div class="icone-grande">🏆</div>
+            <h2>Ranking dos jogadores</h2>
+            <p id="statusRanking" class="subtitulo-ranking">
+                Partidas guardadas neste navegador.
+            </p>
+            <div id="listaRanking" class="lista-ranking"></div>
 
-  <footer>
-    <p>Projeto educativo de Biologia · Sistema cardiovascular ❤️</p>
-  </footer>
+            <button id="novoJogador" class="botao-principal" type="button">
+                Novo jogador
+            </button>
+            <button id="limparRanking" class="botao-secundario" type="button">
+                Limpar ranking deste navegador
+            </button>
+            <button id="voltarResultado" class="botao-secundario escondido" type="button">
+                Voltar ao resultado
+            </button>
+        </section>
+    </main>
 
-  <script src="game.js"></script>
+    <footer>
+        Projeto educativo de Biologia · Sistema cardiovascular 💗
+    </footer>
+
+    <script src="game.js"></script>
 </body>
 </html>

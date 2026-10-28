@@ -1,270 +1,407 @@
 
-/* ===== VISUAL MAIS LIMPO ===== */
-
 * {
   box-sizing: border-box;
 }
 
+:root {
+  --rosa: #ce124c;
+  --rosa-escuro: #a90e3e;
+  --rosa-claro: #fff1f6;
+  --borda: #ffc0d2;
+  --texto: #512c3b;
+  --suave: #805a69;
+}
+
 body {
   margin: 0;
-  background: #fff5f7;
-  color: #40212b;
+  min-height: 100vh;
   font-family: Arial, Helvetica, sans-serif;
+  color: var(--texto);
+  background:
+      radial-gradient(circle at 10% 20%, #ffe1ec, transparent 30%),
+      radial-gradient(circle at 90% 70%, #f0e3ff, transparent 32%),
+      #fff7fa;
 }
 
-header {
-  padding: 18px 14px;
+.cabecalho {
+  padding: 28px 16px 22px;
   text-align: center;
-  background: #c9184a;
   color: white;
+  background: linear-gradient(135deg, #c90e4b, #e95d91);
+  border-bottom: 5px solid #f4a6c2;
 }
 
-header h1 {
-  margin: 0 0 8px;
-  font-size: clamp(1.45rem, 5vw, 2.2rem);
+.cabecalho h1 {
+  margin: 0 0 9px;
+  font-size: clamp(25px, 4vw, 36px);
 }
 
-header p {
+.cabecalho p {
   margin: 0;
 }
 
-main {
-  width: min(100% - 20px, 1000px);
-  margin: 16px auto;
+.container {
+  width: min(100% - 28px, 1000px);
+  margin: 26px auto;
 }
 
 .painel {
-  padding: 18px;
-  margin-bottom: 16px;
-  background: white;
-  border: 1px solid #ffd0dc;
-  border-radius: 16px;
+  padding: clamp(20px, 4vw, 38px);
+  margin-bottom: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+  box-shadow: 0 10px 35px #972f5714;
 }
 
 .cadastro {
-  max-width: 600px;
-  margin: 18px auto;
-}
-
-.cadastro h2,
-.cadastro h3 {
-  margin-top: 0;
+  max-width: 650px;
+  margin: 25px auto;
   text-align: center;
 }
 
-#nomeJogador {
-  width: 100%;
-  min-height: 46px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 1px solid #e9a3b7;
-  border-radius: 10px;
-  font-size: 16px;
+.icone-grande {
+  margin-bottom: 12px;
+  font-size: 45px;
 }
 
-button {
-  min-height: 44px;
-  padding: 10px 16px;
-  border: 0;
-  border-radius: 10px;
-  background: #c9184a;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  touch-action: manipulation;
+h2 {
+  margin-top: 0;
+  color: var(--texto);
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.cadastro p,
+#resultado p,
+.subtitulo-ranking {
+  color: var(--suave);
+  line-height: 1.6;
 }
 
-#comecar {
-  width: 100%;
-}
-
-.instrucoes {
-  margin-top: 20px;
-  padding: 14px;
-  border-radius: 12px;
-  background: #fff1f4;
-}
-
-.instrucoes p {
-  margin: 10px 0;
-  line-height: 1.45;
-}
-
-.informacoes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.jogo {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border: 1px solid #f0c5d0;
-  border-radius: 14px;
-  background: #e7f8ff;
-}
-
-#game {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 1;
-}
-
-.tela {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
+#formCadastro {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: 10px;
-  overflow-y: auto;
-  padding: clamp(12px, 3vw, 28px);
-  background: rgba(255, 255, 255, 0.97);
-  text-align: center;
+  gap: 12px;
+  margin-top: 24px;
+  text-align: left;
 }
 
-.tela h2 {
-  margin: 0;
-  font-size: clamp(1.15rem, 4vw, 1.7rem);
-}
-
-.tela p {
-  margin: 4px 0;
-  line-height: 1.45;
-}
-
-#opcoes {
-  display: grid;
-  gap: 8px;
-  width: 100%;
-}
-
-#opcoes button {
-  width: 100%;
-  min-height: 46px;
-  background: #fff0f4;
-  border: 1px solid #e9a3b7;
-  color: #64152c;
-  overflow-wrap: anywhere;
-}
-
-#opcoes button:disabled {
-  opacity: 0.7;
-}
-
-#feedback {
+label {
   font-weight: bold;
 }
 
-#detalhesPartida {
-  max-height: 130px;
-  overflow-y: auto;
-  text-align: left;
+input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #e7a8bd;
+  border-radius: 11px;
+  outline: none;
+  font: inherit;
+  color: var(--texto);
+  background: #fffafd;
 }
 
-#listaRanking {
-  max-height: 45vh;
-  overflow-y: auto;
-  padding-left: 28px;
-  text-align: left;
+input:focus {
+  border-color: var(--rosa);
+  box-shadow: 0 0 0 3px #ce124c20;
 }
 
-#listaRanking li {
-  padding: 7px 0;
-  overflow-wrap: anywhere;
+button {
+  font: inherit;
 }
 
-.controles {
-  padding: 12px 0;
+.botao-principal,
+.botao-secundario {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 13px 18px;
+  border-radius: 11px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s, transform 0.2s;
 }
 
-.botoes-move {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
+.botao-principal {
+  color: white;
+  background: var(--rosa);
+  border: none;
 }
 
-.botoes-move button {
-  flex: 1;
-  max-width: 150px;
-  min-height: 54px;
-  font-size: 18px;
-  user-select: none;
-  -webkit-user-select: none;
+.botao-principal:hover {
+  background: var(--rosa-escuro);
+  transform: translateY(-1px);
+}
+
+.botao-secundario {
+  margin-top: 12px;
+  color: var(--rosa-escuro);
+  background: #ffe3ed;
+  border: 1px solid var(--borda);
+}
+
+.botao-secundario:hover {
+  background: #ffd2e1;
 }
 
 .escondido {
   display: none !important;
 }
 
-footer {
-  padding: 14px;
-  text-align: center;
-  color: #75404f;
+.informacoes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px;
 }
 
-@media (max-width: 600px) {
-  header {
-    padding: 14px 10px;
-  }
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--rosa-claro);
+}
 
-  main {
-    width: calc(100% - 12px);
-    margin: 8px auto;
-  }
+.info-item span {
+  color: var(--suave);
+  font-size: 13px;
+}
 
-  .painel {
-    padding: 13px;
-    border-radius: 12px;
+.info-item strong {
+  overflow-wrap: anywhere;
+}
+
+.jogo-painel {
+  overflow: hidden;
+  margin-bottom: 22px;
+  background: white;
+  border: 1px solid var(--borda);
+  border-radius: 18px;
+  box-shadow: 0 10px 35px #972f5714;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fce8f2;
+}
+
+.instrucoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 22px;
+  padding: 14px;
+  color: var(--suave);
+  background: white;
+  font-size: 13px;
+  text-align: center;
+}
+
+.controles {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 15px 15px;
+}
+
+.controles button {
+  min-width: 70px;
+  min-height: 43px;
+  padding: 8px 16px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  color: var(--rosa-escuro);
+  background: #fff0f6;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.controles button:active {
+  background: #ffd1e1;
+}
+
+.pergunta-painel {
+  text-align: center;
+}
+
+.etiqueta {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: var(--rosa-escuro);
+  background: #ffe4ee;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+}
+
+#tituloPergunta {
+  margin-bottom: 15px;
+}
+
+#textoPergunta {
+  max-width: 700px;
+  margin: 0 auto 24px;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.opcoes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.opcao-resposta {
+  width: 100%;
+  min-height: 48px;
+  padding: 13px 16px;
+  border: 1px solid #f0b4c8;
+  border-radius: 11px;
+  color: #704052;
+  background: #fff5f8;
+  cursor: pointer;
+  text-align: left;
+}
+
+.opcao-resposta:hover:not(:disabled) {
+  background: #ffe2ec;
+  border-color: #e97ba1;
+}
+
+.opcao-resposta:disabled {
+  cursor: default;
+}
+
+.opcao-resposta.correta {
+  border-color: #55b985;
+  background: #e3f8eb;
+  color: #226b43;
+}
+
+.opcao-resposta.incorreta {
+  border-color: #e17b8b;
+  background: #ffe7e9;
+  color: #9b2940;
+}
+
+.feedback {
+  min-height: 24px;
+  margin: 15px 0;
+  line-height: 1.6;
+  font-weight: bold;
+}
+
+.feedback-correto {
+  color: #247e4c;
+}
+
+.feedback-errado {
+  color: #b32d4e;
+}
+
+#proximo {
+  margin-top: 8px;
+}
+
+.pontuacao-final {
+  color: var(--rosa) !important;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.detalhes-partida {
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 12px;
+  background: var(--rosa-claro);
+  text-align: left;
+  line-height: 1.9;
+}
+
+.detalhes-partida p {
+  margin: 5px 0;
+}
+
+#rankingTela {
+  text-align: center;
+}
+
+.lista-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 24px 0;
+  text-align: left;
+}
+
+.item-ranking {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 16px 18px;
+  border: 1px solid #ffd0df;
+  border-radius: 13px;
+  background: #fff2f6;
+}
+
+.item-ranking strong {
+  overflow-wrap: anywhere;
+}
+
+.item-ranking span {
+  color: #c21850;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.item-ranking small {
+  grid-column: 1 / -1;
+  color: #8b6b78;
+}
+
+.ranking-vazio {
+  padding: 20px;
+  border-radius: 12px;
+  color: var(--suave);
+  background: var(--rosa-claro);
+  text-align: center;
+}
+
+footer {
+  padding: 12px 16px 28px;
+  color: var(--suave);
+  text-align: center;
+  font-size: 13px;
+}
+
+@media (max-width: 650px) {
+  .container {
+      width: min(100% - 18px, 1000px);
+      margin: 15px auto;
   }
 
   .informacoes {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    font-size: 13px;
-    gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .jogo {
-    border-radius: 8px;
+  .item-ranking {
+      grid-template-columns: 1fr;
   }
 
-  #game {
-    aspect-ratio: 1.35 / 1;
+  .item-ranking span {
+      white-space: normal;
   }
 
-  .tela {
-    padding: 10px;
-    gap: 7px;
-  }
-
-  .tela p {
-    font-size: 14px;
-  }
-
-  #opcoes button {
-    padding: 9px;
-    font-size: 14px;
-  }
-
-  .botoes-move {
-    gap: 8px;
-  }
-
-  .botoes-move button {
-    min-height: 52px;
-    padding: 8px;
-    font-size: 16px;
+  .instrucoes {
+      gap: 8px;
+      font-size: 12px;
   }
 }
