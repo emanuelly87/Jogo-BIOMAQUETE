@@ -1,0 +1,439 @@
+
+* {
+    box-sizing: border-box;
+  }
+  
+  :root {
+    --rosa: #ff477e;
+    --rosa-escuro: #c9184a;
+    --rosa-claro: #fff0f3;
+    --borda: #ffb3c1;
+    --texto: #57172b;
+  }
+  
+  html {
+    width: 100%;
+    min-height: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    overflow-x: hidden;
+    background: var(--rosa-claro);
+    color: var(--texto);
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  
+  header {
+    background: var(--rosa-escuro);
+    color: white;
+    padding: clamp(14px, 3vw, 24px) 12px;
+  }
+  
+  header h1 {
+    margin: 0 0 10px;
+    font-size: clamp(21px, 4vw, 34px);
+  }
+  
+  header p {
+    max-width: 750px;
+    margin: 0 auto;
+    font-size: clamp(13px, 2vw, 17px);
+    line-height: 1.5;
+  }
+  
+  .painel {
+    width: calc(100% - 20px);
+    max-width: 900px;
+    margin: 14px auto;
+    padding: clamp(10px, 2.5vw, 18px);
+    background: white;
+    border: 2px solid var(--borda);
+    border-radius: 14px;
+  }
+  
+  .cadastro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .cadastro h2 {
+    margin: 4px 0;
+  }
+  
+  input {
+    width: 100%;
+    max-width: 360px;
+    min-height: 48px;
+    padding: 12px;
+    border: 2px solid #ff8fab;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  
+  button {
+    min-height: 44px;
+    max-width: 100%;
+    padding: 12px 16px;
+    margin: 4px;
+    border: none;
+    border-radius: 10px;
+    background: var(--rosa);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  button:hover {
+    background: var(--rosa-escuro);
+  }
+  
+  button:focus-visible,
+  input:focus-visible {
+    outline: 3px solid #7c3aed;
+    outline-offset: 3px;
+  }
+  
+  button:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+  
+  .escondido {
+    display: none !important;
+  }
+  
+  /* Informações do jogador */
+  
+  #informacoes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  #informacoes span {
+    padding: 9px 12px;
+    background: var(--rosa-claro);
+    border-radius: 9px;
+    overflow-wrap: anywhere;
+  }
+  
+  /* Área do jogo */
+  
+  .jogo {
+    position: relative;
+    isolation: isolate;
+    width: calc(100% - 20px);
+    max-width: 900px;
+    margin: 14px auto;
+    overflow: hidden;
+    border: 3px solid #9d174d;
+    border-radius: 12px;
+    background: #bdeeff;
+  }
+  
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 1;
+    background: #bdeeff;
+  }
+  
+  /* Telas de início, perguntas, resultado e ranking */
+  
+  .tela {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(4px, 1.2vw, 12px);
+    padding: clamp(8px, 2.5vw, 22px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: rgba(59, 13, 32, 0.95);
+    color: white;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .tela h2 {
+    margin: 4px 0;
+    color: #ffb3c1;
+    font-size: clamp(17px, 3.5vw, 30px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  
+  .tela h3 {
+    margin: 4px 0;
+    font-size: clamp(16px, 3vw, 23px);
+  }
+  
+  .tela p {
+    max-width: 600px;
+    margin: 4px 0;
+    font-size: clamp(12px, 2vw, 17px);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  
+  #opcoes {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+    width: min(550px, 100%);
+  }
+  
+  #opcoes button {
+    width: 100%;
+    min-height: 42px;
+    margin: 0;
+    padding: 9px 12px;
+    background: white;
+    color: #701a32;
+    border: 2px solid #ff8fab;
+    text-align: left;
+    font-size: clamp(12px, 1.8vw, 15px);
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  
+  #opcoes button:hover:not(:disabled) {
+    background: #ffe0e8;
+  }
+  
+  #feedback {
+    color: #ffe08a;
+    font-weight: bold;
+  }
+  
+  #detalhesPartida {
+    width: 100%;
+    max-width: 560px;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+  
+  #listaRanking {
+    width: 100%;
+    max-width: 500px;
+    padding-left: 30px;
+    text-align: left;
+  }
+  
+  #listaRanking li {
+    margin: 8px 0;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  
+  /* Controles para celular */
+  
+  .controles {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px;
+  }
+  
+  .controles p {
+    font-size: clamp(12px, 2vw, 16px);
+    line-height: 1.5;
+  }
+  
+  .botoes-move {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(8px, 3vw, 20px);
+    width: 100%;
+  }
+  
+  .botoes-move button {
+    flex: 1;
+    max-width: 150px;
+    min-width: 0;
+    min-height: 58px;
+    padding: 10px;
+    font-size: clamp(17px, 4vw, 23px);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  
+  .regras {
+    line-height: 1.5;
+  }
+  
+  footer {
+    padding: 12px;
+    font-size: 13px;
+  }
+  
+  /* Celulares estreitos */
+  
+  @media (max-width: 480px) {
+    header {
+      padding: 14px 10px;
+    }
+  
+    .painel {
+      width: calc(100% - 16px);
+      margin: 9px auto;
+      border-radius: 10px;
+    }
+  
+    #informacoes {
+      gap: 5px;
+    }
+  
+    #informacoes span {
+      flex: 1 1 40%;
+      padding: 8px 5px;
+      font-size: 12px;
+    }
+  
+    .jogo {
+      width: calc(100% - 12px);
+      margin: 8px auto;
+      border-width: 2px;
+      border-radius: 8px;
+    }
+  
+    .tela {
+      gap: 4px;
+      padding: 6px;
+    }
+  
+    .tela h2 {
+      font-size: clamp(15px, 4.2vw, 20px);
+    }
+  
+    .tela p {
+      font-size: clamp(11px, 3vw, 13px);
+      line-height: 1.3;
+    }
+  
+    .tela button {
+      min-height: 36px;
+      padding: 7px;
+      margin: 2px;
+      font-size: 12px;
+    }
+  
+    #opcoes {
+      gap: 3px;
+    }
+  
+    #opcoes button {
+      min-height: 34px;
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+  
+    #detalhesPartida {
+      font-size: 11px;
+    }
+  
+    .botoes-move button {
+      min-height: 58px;
+    }
+  
+    .controles {
+      padding: 5px 8px;
+    }
+  }
+  
+  /* Celular na horizontal */
+  
+  @media (max-height: 500px) and (orientation: landscape) {
+    header {
+      padding: 8px;
+    }
+  
+    header h1 {
+      font-size: 21px;
+      margin-bottom: 4px;
+    }
+  
+    header p {
+      font-size: 12px;
+    }
+  
+    .painel {
+      margin: 6px auto;
+      padding: 8px;
+    }
+  
+    .jogo {
+      width: min(900px, 96vw);
+    }
+  
+    .tela {
+      justify-content: flex-start;
+      gap: 4px;
+      padding: 6px 12px;
+    }
+  
+    .tela h2 {
+      font-size: 18px;
+    }
+  
+    .tela p {
+      font-size: 12px;
+      line-height: 1.25;
+    }
+  
+    #opcoes {
+      width: min(550px, 95%);
+    }
+  
+    #opcoes button {
+      min-height: 32px;
+      padding: 5px 8px;
+    }
+  
+    .controles {
+      padding: 4px;
+    }
+  
+    .controles p {
+      margin: 4px;
+    }
+  
+    .botoes-move button {
+      min-height: 42px;
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+  
