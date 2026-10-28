@@ -405,3 +405,70 @@ footer {
       font-size: 12px;
   }
 }
+
+/* Perguntas flutuando na frente do jogo */
+.jogo-painel {
+  position: relative;
+}
+
+.pergunta-painel {
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(90%, 650px);
+  max-height: 90%;
+  overflow-y: auto;
+  margin: 0;
+  padding: clamp(16px, 3vw, 28px);
+  background: rgba(255, 250, 253, 0.98);
+  border: 2px solid #f39cbd;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(106, 35, 70, 0.28);
+  text-align: center;
+}
+
+.pergunta-painel h2 {
+  margin-bottom: 12px;
+}
+
+.pergunta-painel #textoPergunta {
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.pergunta-painel .opcoes {
+  gap: 8px;
+}
+
+.pergunta-painel .opcao-resposta {
+  min-height: 42px;
+  padding: 10px 12px;
+}
+
+.pergunta-painel .feedback {
+  margin: 10px 0;
+}
+
+.pergunta-painel #proximo {
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .pergunta-painel {
+      width: 94%;
+      max-height: 95%;
+      padding: 13px;
+  }
+
+  .pergunta-painel #textoPergunta {
+      font-size: 14px;
+  }
+
+  .pergunta-painel .opcao-resposta {
+      min-height: 38px;
+      padding: 8px;
+      font-size: 13px;
+  }
+}

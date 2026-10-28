@@ -51,6 +51,19 @@
         <section class="jogo-painel">
             <canvas id="game" width="900" height="450"
                 aria-label="Jogo Aventura pelo Coração"></canvas>
+
+                <section id="pergunta" class="painel pergunta-painel escondido">
+                  <span class="etiqueta">DESAFIO DO CORAÇÃO 💗</span>
+                  <h2 id="tituloPergunta">Pergunta 1 de 5</h2>
+                  <p id="textoPergunta"></p>
+                  <div id="opcoes" class="opcoes"></div>
+                  <p id="feedback" class="feedback" aria-live="polite"></p>
+      
+                  <button id="proximo" class="botao-principal" type="button">
+                      Continuar aventura 💗
+                  </button>
+              </section>
+
             <div class="instrucoes">
                 <span>⬅️ ➡️ Mover</span>
                 <span>⬆️ ou Espaço: pular</span>
@@ -62,18 +75,6 @@
                 <button id="pular" type="button" aria-label="Pular">⬆ Pular</button>
                 <button id="direita" type="button" aria-label="Mover para direita">▶</button>
             </div>
-        </section>
-
-        <section id="pergunta" class="painel pergunta-painel escondido">
-            <span class="etiqueta">DESAFIO DO CORAÇÃO 💗</span>
-            <h2 id="tituloPergunta">Pergunta 1 de 5</h2>
-            <p id="textoPergunta"></p>
-            <div id="opcoes" class="opcoes"></div>
-            <p id="feedback" class="feedback" aria-live="polite"></p>
-
-            <button id="proximo" class="botao-principal" type="button">
-                Continuar aventura 💗
-            </button>
         </section>
 
         <section id="resultado" class="painel escondido">
