@@ -3,8 +3,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#c9184a">
   <title>Aventura pelo Coração</title>
   <link rel="stylesheet" href="style.css">
@@ -12,35 +11,46 @@
 <body>
   <header>
     <h1>❤️ Aventura pelo Coração</h1>
-    <p>Você é uma hemácia! Percorra o sistema circulatório e faça as escolhas certas.</p>
+    <p>Uma aventura pelo sistema cardiovascular</p>
   </header>
 
-  <section id="cadastro" class="painel cadastro">
-    <h2>🩸 Quem vai jogar?</h2>
-    <input id="nomeJogador" maxlength="30"
-           placeholder="Digite seu nome" autocomplete="off">
-    <button id="comecar">Começar aventura</button>
-    <p>Cada participante terá sua própria pontuação.</p>
-  </section>
-
-  <section id="informacoes" class="painel escondido">
-    <span>🧑 <b id="nomeAtual"></b></span>
-    <span>❤️ Vidas: <b id="vidas">3</b></span>
-    <span>⭐ Pontos: <b id="pontos">0</b></span>
-    <span>📍 <b id="fase">Coração direito</b></span>
-  </section>
-
   <main>
+    <section id="cadastro" class="painel cadastro">
+      <h2>🩸 Quem vai jogar?</h2>
+      <input id="nomeJogador" maxlength="30"
+        placeholder="Digite seu nome" autocomplete="off">
+      <button id="comecar">Começar aventura</button>
+
+      <div class="instrucoes">
+        <h3>📖 Como jogar</h3>
+        <p>🩸 Você controla uma hemácia pelo sistema circulatório.</p>
+        <p>➡️ Use as setas para andar.</p>
+        <p>⬆️ Pule com a seta para cima ou a barra de espaço.</p>
+        <p>📱 No celular, use os botões que aparecem durante o jogo.</p>
+        <p>❓ Ao encontrar uma pergunta, escolha uma resposta para continuar.</p>
+        <p>⭐ Resposta correta: +100 pontos.</p>
+        <p>🟡 Resposta parcialmente correta: +50 pontos.</p>
+        <p>❤️ Resposta incorreta: −25 pontos e perde uma vida.</p>
+        <p>🏆 No final, confira sua pontuação no ranking!</p>
+      </div>
+    </section>
+
+    <section id="informacoes" class="painel informacoes escondido">
+      <span>🧑 <b id="nomeAtual"></b></span>
+      <span>❤️ Vidas: <b id="vidas">3</b></span>
+      <span>⭐ Pontos: <b id="pontos">0</b></span>
+      <span>📍 <b id="fase">Coração direito</b></span>
+    </section>
+
     <section class="jogo" aria-label="Jogo de plataforma">
       <canvas id="game" width="900" height="450">
         Seu navegador não suporta o jogo.
       </canvas>
 
-      <div id="mensagem" class="tela">
+      <div id="mensagem" class="tela escondido">
         <h2>🫀 Sua missão</h2>
-        <p>Controle uma hemácia pelo coração, pelos pulmões e pelo corpo humano.</p>
-        <p>Pule os obstáculos e escolha o caminho correto para ganhar pontos!</p>
-        <p>Use as setas do teclado ou os controles de toque.</p>
+        <p>Percorra o coração, os pulmões e o corpo humano!</p>
+        <button id="iniciarDoPainel">Jogar</button>
       </div>
 
       <div id="pergunta" class="tela escondido">
@@ -48,6 +58,7 @@
         <p id="textoPergunta"></p>
         <div id="opcoes"></div>
         <p id="feedback" aria-live="polite"></p>
+        <button id="proximo" disabled>Continuar aventura</button>
       </div>
 
       <div id="resultado" class="tela escondido">
@@ -55,34 +66,25 @@
         <p id="resumo"></p>
         <h3 id="pontuacaoFinal"></h3>
         <div id="detalhesPartida"></div>
-        <button id="proximo">Próximo jogador</button>
         <button id="verRanking">Ver ranking</button>
+        <button id="proximoJogador">Próximo jogador</button>
       </div>
 
       <div id="rankingTela" class="tela escondido">
         <h2>🏆 Ranking dos jogadores</h2>
+        <p>Partidas registradas neste navegador.</p>
         <ol id="listaRanking"></ol>
         <button id="novoJogador">Novo jogador</button>
         <button id="limparRanking">Limpar ranking</button>
       </div>
     </section>
 
-    <section class="controles">
-      <p><b>Computador:</b> ← → andar · Espaço ou ↑ pular</p>
-      <p><b>Celular:</b> use os botões abaixo para controlar a hemácia.</p>
+    <section id="controles" class="controles escondido">
       <div class="botoes-move">
         <button id="esquerda" aria-label="Mover para esquerda">◀</button>
         <button id="pular" aria-label="Pular">⬆ PULAR</button>
         <button id="direita" aria-label="Mover para direita">▶</button>
       </div>
-    </section>
-
-    <section class="painel regras">
-      <h2>📚 Regras da pontuação</h2>
-      <p>✅ Resposta correta: <strong>+100 pontos</strong></p>
-      <p>🟡 Resposta parcialmente correta: <strong>+50 pontos</strong></p>
-      <p>❌ Resposta incorreta: <strong>−25 pontos</strong> e perda de uma vida.</p>
-      <p>O resultado de cada partida é salvo no ranking deste navegador.</p>
     </section>
   </main>
 

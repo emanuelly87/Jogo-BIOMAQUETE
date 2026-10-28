@@ -1,12 +1,14 @@
 
 /* =====================================================
    AVENTURA PELO CORAÇÃO ❤️🩸
-   JavaScript completo
-   50 perguntas; 5 sorteadas por partida
-   Compatível com o index.html enviado
+   Jogo completo, responsivo e compatível com index.html
+   50 perguntas no banco; 5 sorteadas por partida
+   Ranking com todas as partidas salvas no navegador
    ===================================================== */
 
-   const canvas = document.getElementById("game");
+   const $ = id => document.getElementById(id);
+
+   const canvas = $("game");
    const ctx = canvas.getContext("2d");
    
    const W = canvas.width;
@@ -14,14 +16,13 @@
    const CHAO = H - 60;
    const MUNDO = 2300;
    
-   const $ = id => document.getElementById(id);
-   
    const cadastro = $("cadastro");
    const informacoes = $("informacoes");
    const mensagem = $("mensagem");
    const telaPergunta = $("pergunta");
    const telaResultado = $("resultado");
    const rankingTela = $("rankingTela");
+   const controles = $("controles");
    
    const nomeInput = $("nomeJogador");
    const nomePainel = $("nomeAtual");
@@ -44,8 +45,10 @@
    const btnComecar = $("comecar");
    const btnProximo = $("proximo");
    const btnVerRanking = $("verRanking");
+   const btnProximoJogador = $("proximoJogador");
    const btnNovoJogador = $("novoJogador");
    const btnLimparRanking = $("limparRanking");
+   const btnIniciarDoPainel = $("iniciarDoPainel");
    
    const btnEsquerda = $("esquerda");
    const btnDireita = $("direita");
@@ -53,350 +56,584 @@
    
    /* =====================================================
       BANCO DE 50 PERGUNTAS
-      Cada resposta: [texto, pontos, explicação]
+      Cada opção contém: texto, pontos e explicação.
       ===================================================== */
    
    const bancoPerguntas = [
-     ["O coração", "Qual é a principal função do coração?", [
-       ["Bombear o sangue pelo corpo", 100, "O coração impulsiona o sangue pela circulação."],
-       ["Produzir todo o sangue", 50, "As células sanguíneas são produzidas principalmente na medula óssea."],
-       ["Filtrar o ar", -25, "Essa função está ligada ao sistema respiratório."]
-     ]],
-     ["As hemácias", "Qual é a principal função dos glóbulos vermelhos?", [
-       ["Transportar oxigênio", 100, "As hemácias transportam grande parte do oxigênio."],
-       ["Combater micróbios", 50, "A defesa é principalmente função dos glóbulos brancos."],
-       ["Produzir hormônios", -25, "Os hormônios são produzidos por órgãos e glândulas."]
-     ]],
-     ["Os glóbulos brancos", "Qual é a função dos glóbulos brancos?", [
-       ["Ajudar na defesa do organismo", 100, "Eles participam da defesa contra agentes infecciosos."],
-       ["Transportar a maior parte do oxigênio", 50, "Essa tarefa é principalmente das hemácias."],
-       ["Bombear o coração", -25, "Quem bombeia o sangue é o coração."]
-     ]],
-     ["As plaquetas", "O que as plaquetas ajudam a fazer?", [
-       ["Ajudar a estancar sangramentos", 100, "Elas participam da coagulação."],
-       ["Levar oxigênio aos músculos", 50, "As hemácias transportam a maior parte do oxigênio."],
-       ["Produzir ar", -25, "O sangue não produz ar."]
-     ]],
-     ["O plasma", "O que é o plasma sanguíneo?", [
-       ["A parte líquida do sangue", 100, "O plasma transporta várias substâncias."],
-       ["Um tipo de osso", -25, "O plasma é a parte líquida do sangue."],
-       ["Uma válvula do coração", -25, "As válvulas controlam o fluxo do sangue no coração."]
-     ]],
-     ["As artérias", "Em geral, para onde as artérias levam o sangue?", [
-       ["Para fora do coração", 100, "Artérias levam o sangue para longe do coração."],
-       ["Sempre para dentro do coração", -25, "As veias trazem o sangue de volta."],
-       ["Somente para os pulmões", 50, "A artéria pulmonar vai aos pulmões, mas existem outras artérias."]
-     ]],
-     ["As veias", "Qual é a função geral das veias?", [
-       ["Levar sangue de volta ao coração", 100, "As veias retornam o sangue ao coração."],
-       ["Produzir células sanguíneas", 50, "As células são produzidas principalmente na medula óssea."],
-       ["Levar ar aos pulmões", -25, "O ar circula pelas vias respiratórias."]
-     ]],
-     ["Os capilares", "O que acontece principalmente nos capilares?", [
-       ["Trocas de gases e nutrientes com os tecidos", 100, "Os capilares permitem trocas entre sangue e tecidos."],
-       ["O coração bate", 50, "Os batimentos acontecem no coração."],
-       ["O sangue é produzido", -25, "A produção das células ocorre principalmente na medula óssea."]
-     ]],
-     ["As cavidades", "Quantas cavidades tem o coração humano?", [
-       ["Quatro", 100, "São dois átrios e dois ventrículos."],
-       ["Duas", 50, "O coração tem duas metades, cada uma com duas cavidades."],
-       ["Seis", -25, "O coração humano possui quatro cavidades."]
-     ]],
-     ["Os átrios", "Qual é a função dos átrios?", [
-       ["Receber o sangue que chega ao coração", 100, "O sangue chega primeiro aos átrios."],
-       ["Produzir oxigênio", -25, "O oxigênio passa para o sangue nos pulmões."],
-       ["Filtrar resíduos como os rins", 50, "Os rins filtram o sangue; os átrios o recebem."]
-     ]],
-     ["Os ventrículos", "O que os ventrículos fazem?", [
-       ["Bombeiam sangue para fora do coração", 100, "O direito envia sangue aos pulmões e o esquerdo ao corpo."],
-       ["Recebem ar da traqueia", -25, "A traqueia pertence ao sistema respiratório."],
-       ["Produzem plaquetas", 50, "As plaquetas são formadas na medula óssea."]
-     ]],
-     ["Lado direito", "Para onde o lado direito do coração bombeia o sangue?", [
-       ["Para os pulmões", 100, "O ventrículo direito envia sangue aos pulmões."],
-       ["Diretamente para o cérebro", 50, "O cérebro recebe sangue pela circulação sistêmica."],
-       ["Somente para o estômago", -25, "O sangue é distribuído pelo corpo."]
-     ]],
-     ["Lado esquerdo", "Para onde o lado esquerdo do coração bombeia o sangue?", [
-       ["Para o restante do corpo", 100, "O ventrículo esquerdo bombeia sangue para o organismo."],
-       ["Somente para os pulmões", 50, "O lado direito envia sangue aos pulmões."],
-       ["Somente para o estômago", -25, "O sangue chega a vários órgãos."]
-     ]],
-     ["Artéria pulmonar", "Que tipo de sangue a artéria pulmonar transporta?", [
-       ["Sangue com pouco oxigênio em direção aos pulmões", 100, "É uma exceção à ideia comum sobre artérias e oxigênio."],
-       ["Sangue sem células", -25, "O sangue contém células e plasma."],
-       ["Somente sangue rico em oxigênio", 50, "As veias pulmonares trazem sangue rico em oxigênio."]
-     ]],
-     ["Veias pulmonares", "O que as veias pulmonares levam ao coração?", [
-       ["Sangue rico em oxigênio vindo dos pulmões", 100, "Elas chegam ao átrio esquerdo."],
-       ["Sangue com pouco oxigênio vindo do corpo", 50, "Esse sangue retorna pelas veias cavas."],
-       ["Ar para os pulmões", -25, "O ar não circula pelas veias."]
-     ]],
-     ["A aorta", "Qual é a função da aorta?", [
-       ["Levar sangue do coração para o corpo", 100, "A aorta é a maior artéria do corpo."],
-       ["Levar ar à traqueia", -25, "A aorta é um vaso sanguíneo."],
-       ["Trazer sangue dos pulmões ao coração", 50, "Essa é a função das veias pulmonares."]
-     ]],
-     ["Veias cavas", "O que as veias cavas fazem?", [
-       ["Trazem sangue do corpo para o átrio direito", 100, "Elas retornam o sangue ao coração."],
-       ["Levam sangue do coração aos pulmões", 50, "Essa é a função da artéria pulmonar."],
-       ["Levam ar ao estômago", -25, "O ar não circula pelos vasos sanguíneos."]
-     ]],
-     ["Circulação pulmonar", "Qual caminho descreve a circulação pulmonar?", [
-       ["Coração, pulmões e coração", 100, "O sangue vai aos pulmões e depois retorna ao coração."],
-       ["Coração, pernas e cérebro apenas", 50, "Esses órgãos participam da circulação sistêmica."],
-       ["Estômago e rins sem passar pelo coração", -25, "O coração impulsiona a circulação."]
-     ]],
-     ["Circulação sistêmica", "Qual caminho descreve a circulação sistêmica?", [
-       ["Coração, corpo e coração", 100, "O sangue vai aos tecidos e retorna ao coração."],
-       ["Pulmões, traqueia e nariz", -25, "Esse caminho está ligado à respiração."],
-       ["Somente o lado direito do coração", 50, "A circulação sistêmica começa no ventrículo esquerdo."]
-     ]],
-     ["Oxigênio", "Por que as células precisam de oxigênio?", [
-       ["Para ajudar a produzir energia", 100, "A maioria das células usa oxigênio na respiração celular."],
-       ["Para transformar ossos em sangue", -25, "O oxigênio não transforma ossos em sangue."],
-       ["Para substituir toda a água", 50, "Água e oxigênio têm funções diferentes."]
-     ]],
-     ["Gás carbônico", "O que acontece com grande parte do gás carbônico produzido pelo corpo?", [
-       ["É levado aos pulmões para ser eliminado", 100, "Ele passa para os pulmões e sai na expiração."],
-       ["Fica guardado para sempre no coração", -25, "O corpo elimina o excesso de gás carbônico."],
-       ["Vira osso imediatamente", -25, "O gás carbônico não se transforma diretamente em osso."]
-     ]],
-     ["Os pulmões", "Qual é o papel dos pulmões na circulação?", [
-       ["Permitir que o sangue receba oxigênio e elimine gás carbônico", 100, "As trocas gasosas acontecem nos pulmões."],
-       ["Bombear sangue para o corpo", -25, "Quem bombeia o sangue é o coração."],
-       ["Produzir todas as células do sangue", 50, "As células sanguíneas são produzidas principalmente na medula óssea."]
-     ]],
-     ["Os alvéolos", "Onde ocorrem as trocas gasosas nos pulmões?", [
-       ["Nos alvéolos pulmonares", 100, "Os alvéolos ficam próximos dos capilares."],
-       ["Nas válvulas cardíacas", -25, "As válvulas controlam o fluxo de sangue."],
-       ["Nos ossos das pernas", -25, "As trocas gasosas acontecem nos pulmões."]
-     ]],
-     ["Batimentos", "O que representa um batimento cardíaco?", [
-       ["A atividade de contração e relaxamento do coração", 100, "O ciclo cardíaco inclui contração e relaxamento."],
-       ["Uma respiração completa", 50, "Respiração e batimento são processos diferentes."],
-       ["O movimento dos alimentos no estômago", -25, "A digestão é outra função do corpo."]
-     ]],
-     ["Sístole", "O que acontece durante a sístole ventricular?", [
-       ["Os ventrículos se contraem e ejetam sangue", 100, "A contração impulsiona sangue para as artérias."],
-       ["Os pulmões param de funcionar", -25, "A sístole é uma fase do ciclo cardíaco."],
-       ["O sangue deixa de circular", -25, "O sangue continua circulando durante o ciclo cardíaco."]
-     ]],
-     ["Diástole", "O que acontece durante a diástole?", [
-       ["O coração relaxa e suas cavidades se enchem", 100, "O relaxamento permite o enchimento das cavidades."],
-       ["O coração fica permanentemente parado", -25, "A diástole é uma fase normal do ciclo cardíaco."],
-       ["As artérias viram veias", -25, "Artérias e veias são vasos diferentes."]
-     ]],
-     ["O pulso", "O que você percebe quando mede o pulso no punho?", [
-       ["Ondas de pressão nas artérias", 100, "Essas ondas estão relacionadas aos batimentos cardíacos."],
-       ["O ar entrando nos pulmões", 50, "Respiração e pulso podem variar juntos, mas são diferentes."],
-       ["A digestão dos alimentos", -25, "O pulso está ligado à circulação."]
-     ]],
-     ["Cor do sangue", "Qual afirmação sobre a cor do sangue humano está correta?", [
-       ["É vermelho e pode ter tons diferentes conforme a oxigenação", 100, "O sangue com mais oxigênio tende a ser vermelho mais vivo."],
-       ["O sangue das veias é azul", -25, "O sangue é vermelho; a pele pode fazer as veias parecerem azuladas."],
-       ["O sangue é sempre verde", -25, "O sangue humano é vermelho."]
-     ]],
-     ["O sangue", "Como o sangue é classificado no corpo humano?", [
-       ["Como um tecido líquido", 100, "É formado por plasma e elementos celulares."],
-       ["Como um osso líquido", -25, "O sangue é um tecido, não um osso."],
-       ["Como um órgão sólido", 50, "O sangue é um tecido líquido."]
-     ]],
-     ["Entrada de oxigênio", "Como o oxigênio entra no sangue?", [
-       ["Pelas trocas gasosas nos pulmões", 100, "O oxigênio passa dos alvéolos para o sangue."],
-       ["Pelos alimentos diretamente para as veias", 50, "O oxigênio vem do ar respirado."],
-       ["É fabricado pelo coração", -25, "O coração bombeia sangue, mas não fabrica oxigênio."]
-     ]],
-     ["Nutrientes", "Como os nutrientes chegam às células?", [
-       ["São transportados pelo sangue", 100, "O sangue distribui nutrientes absorvidos pelo sistema digestório."],
-       ["São transportados somente pelo ar", 50, "O ar fornece oxigênio; o sangue leva muitos nutrientes."],
-       ["São produzidos pelas artérias", -25, "As artérias transportam sangue."]
-     ]],
-     ["Hormônios", "Qual é uma função do sangue relacionada aos hormônios?", [
-       ["Transportar hormônios até órgãos e tecidos", 100, "O sangue ajuda a distribuir hormônios pelo corpo."],
-       ["Destruir todos os hormônios", -25, "Os hormônios são mensageiros químicos importantes."],
-       ["Transformar hormônios em ossos", -25, "Hormônios não se transformam diretamente em ossos."]
-     ]],
-     ["Temperatura corporal", "Como a circulação ajuda a regular a temperatura?", [
-       ["Distribuindo calor e ajustando o fluxo de sangue na pele", 100, "Os vasos ajudam o corpo a trocar calor com o ambiente."],
-       ["Parando todos os batimentos", -25, "O coração precisa continuar bombeando sangue."],
-       ["Transformando o sangue em gelo", -25, "O sangue permanece líquido em condições normais."]
-     ]],
-     ["Coagulação", "Por que a coagulação do sangue é importante?", [
-       ["Ajuda a reduzir a perda de sangue em ferimentos", 100, "A coagulação ajuda a controlar o sangramento."],
-       ["Impede o coração de bater", -25, "A coagulação normal ajuda a estancar sangramentos."],
-       ["Leva ar às células", -25, "O sangue transporta oxigênio, não ar."]
-     ]],
-     ["Miocárdio", "Como se chama o músculo do coração?", [
-       ["Miocárdio", 100, "O miocárdio é o músculo responsável pela contração cardíaca."],
-       ["Epiderme", -25, "A epiderme é a camada mais externa da pele."],
-       ["Cartilagem", 50, "O coração tem vários tecidos, incluindo o miocárdio."]
-     ]],
-     ["Septo cardíaco", "Qual é a função do septo do coração?", [
-       ["Separar o lado direito do esquerdo", 100, "O septo separa as duas metades do coração."],
-       ["Produzir oxigênio", -25, "O oxigênio vem do ar e passa ao sangue nos pulmões."],
-       ["Ligar o coração ao estômago", -25, "O septo é uma estrutura interna do coração."]
-     ]],
-     ["Válvulas", "Qual é a função das válvulas cardíacas?", [
-       ["Ajudar a impedir que o sangue volte na direção errada", 100, "As válvulas ajudam a manter o fluxo em uma direção."],
-       ["Produzir glóbulos brancos", 50, "Os glóbulos brancos são produzidos principalmente na medula óssea."],
-       ["Permitir que o ar entre no coração", -25, "O ar não circula dentro do coração."]
-     ]],
-     ["Tricúspide", "Onde fica a válvula tricúspide?", [
-       ["Entre o átrio direito e o ventrículo direito", 100, "Ela ajuda a impedir o retorno do sangue ao átrio direito."],
-       ["Entre o átrio esquerdo e o ventrículo esquerdo", 50, "Essa é a posição da válvula mitral."],
-       ["Dentro dos pulmões", -25, "A válvula tricúspide fica no coração."]
-     ]],
-     ["Mitral", "Onde fica a válvula mitral?", [
-       ["Entre o átrio esquerdo e o ventrículo esquerdo", 100, "A válvula mitral também é chamada de bicúspide."],
-       ["Entre o átrio direito e o ventrículo direito", 50, "Essa é a posição da válvula tricúspide."],
-       ["Entre os dois pulmões", -25, "A válvula mitral fica no coração."]
-     ]],
-     ["Válvula pulmonar", "Onde fica a válvula pulmonar?", [
-       ["Na saída do ventrículo direito para a artéria pulmonar", 100, "Ela ajuda a impedir que o sangue retorne ao ventrículo."],
-       ["Na saída do ventrículo esquerdo para a aorta", 50, "Essa é a posição da válvula aórtica."],
-       ["Dentro do estômago", -25, "A válvula pulmonar fica no coração."]
-     ]],
-     ["Válvula aórtica", "Onde fica a válvula aórtica?", [
-       ["Na saída do ventrículo esquerdo para a aorta", 100, "Ela controla a passagem de sangue para a aorta."],
-       ["Entre o átrio direito e o ventrículo direito", 50, "Essa é a posição da válvula tricúspide."],
-       ["Na entrada dos pulmões", -25, "A válvula aórtica fica na saída do ventrículo esquerdo."]
-     ]],
-     ["Frequência cardíaca", "O que significa frequência cardíaca?", [
-       ["Quantidade de batimentos por minuto", 100, "A frequência cardíaca é expressa em batimentos por minuto."],
-       ["Quantidade de respirações por dia", 50, "Isso está relacionado à frequência respiratória."],
-       ["Quantidade de ossos do corpo", -25, "A frequência cardíaca mede os batimentos do coração."]
-     ]],
-     ["Exercício físico", "Por que o coração bate mais rápido durante exercícios?", [
-       ["Os músculos precisam de mais oxigênio e nutrientes", 100, "O coração aumenta o fluxo sanguíneo para atender à demanda."],
-       ["O sangue deixa de circular", -25, "A circulação continua e geralmente aumenta durante o exercício."],
-       ["Os pulmões param de funcionar", -25, "Os pulmões continuam trabalhando durante o exercício."]
-     ]],
-     ["Cuidar do coração", "Qual hábito ajuda a manter o coração saudável?", [
-       ["Fazer atividade física adequada regularmente", 100, "A atividade física regular contribui para a saúde cardiovascular."],
-       ["Nunca se movimentar", -25, "Movimentar-se adequadamente beneficia a saúde."],
-       ["Dormir muito pouco sempre", -25, "Dormir o suficiente também é importante."]
-     ]],
-     ["Cigarro", "Como fumar pode afetar o sistema cardiovascular?", [
-       ["Pode prejudicar os vasos e aumentar riscos cardiovasculares", 100, "Fumar aumenta o risco de doenças do coração e dos vasos."],
-       ["Fortalece sempre as artérias", -25, "Fumar pode danificar os vasos sanguíneos."],
-       ["Não afeta a circulação", -25, "O tabagismo prejudica a saúde cardiovascular."]
-     ]],
-     ["Água", "Por que beber água é importante?", [
-       ["Ajuda a manter o equilíbrio de líquidos do corpo", 100, "A hidratação contribui para o funcionamento do organismo."],
-       ["Substitui o sangue", -25, "A água não substitui o sangue."],
-       ["Faz o coração parar", -25, "A hidratação adequada ajuda o corpo a funcionar normalmente."]
-     ]],
-     ["Pressão arterial", "O que é a pressão arterial?", [
-       ["A força do sangue contra as paredes das artérias", 100, "A pressão arterial é medida com valores sistólico e diastólico."],
-       ["A temperatura dos pulmões", -25, "Pressão arterial não é temperatura."],
-       ["A quantidade de ossos", -25, "A pressão arterial está relacionada à circulação."]
-     ]],
-     ["Alimentação", "Qual escolha costuma ajudar na saúde cardiovascular?", [
-       ["Ter alimentação equilibrada e variada", 100, "Uma alimentação equilibrada contribui para a saúde do coração."],
-       ["Comer apenas um alimento", -25, "O organismo precisa de vários nutrientes."],
-       ["Evitar toda atividade física", -25, "A atividade física adequada é benéfica para muitas pessoas."]
-     ]],
-     ["Circulação contínua", "Como o sangue circula no corpo?", [
-       ["Continuamente pelos vasos, impulsionado pelo coração", 100, "O coração e os vasos mantêm o sangue em circulação."],
-       ["Uma única vez e depois desaparece", -25, "O sangue circula continuamente."],
-       ["Somente nos braços", -25, "O sangue chega aos tecidos de todo o corpo."]
-     ]],
-     ["Cérebro", "Por que o cérebro precisa receber sangue continuamente?", [
-       ["Para receber oxigênio e glicose", 100, "O cérebro precisa de oxigênio e nutrientes para funcionar."],
-       ["Para transformar sangue em ar", -25, "O sangue transporta substâncias importantes ao cérebro."],
-       ["Para produzir todos os ossos", -25, "O cérebro não produz todos os ossos."]
-     ]],
-     ["Rins", "Qual é uma função dos rins relacionada ao sangue?", [
-       ["Filtrar o sangue e ajudar a eliminar resíduos pela urina", 100, "Os rins ajudam a regular líquidos e remover resíduos."],
-       ["Bombear sangue aos pulmões", 50, "Essa é uma função do coração."],
-       ["Transportar ar pela traqueia", -25, "O ar circula no sistema respiratório."]
-     ]],
-     ["Intestino", "Depois da digestão, como muitos nutrientes chegam ao corpo?", [
-       ["São absorvidos no intestino e transportados pelo sangue", 100, "Muitos nutrientes entram na circulação após a absorção intestinal."],
-       ["São enviados diretamente pelos ossos", -25, "Os ossos não transportam diretamente os nutrientes digeridos."],
-       ["Viraram ar nos pulmões", -25, "Os nutrientes são absorvidos e distribuídos pelo organismo."]
-     ]],
-     ["Sangue nas pernas", "O que ajuda o sangue das pernas a retornar ao coração?", [
-       ["Contrações musculares e válvulas das veias", 100, "Os músculos ajudam a empurrar o sangue e as válvulas reduzem o refluxo."],
-       ["A gravidade sempre empurra o sangue para cima", -25, "A gravidade dificulta o retorno do sangue das pernas."],
-       ["Somente os pulmões", 50, "A respiração pode contribuir, mas músculos e válvulas são importantes."]
-     ]],
-     ["Tipos de vasos", "Quais são os três principais tipos de vasos sanguíneos?", [
-       ["Artérias, veias e capilares", 100, "Esses três tipos formam a rede de vasos sanguíneos."],
-       ["Nervos, músculos e ossos", -25, "Essas estruturas não são vasos sanguíneos."],
-       ["Traqueia, brônquios e alvéolos", 50, "Essas estruturas pertencem ao sistema respiratório."]
-     ]],
-     ["Paredes dos capilares", "Por que as paredes dos capilares são muito finas?", [
-       ["Para facilitar as trocas entre sangue e tecidos", 100, "A parede fina facilita as trocas de gases e substâncias."],
-       ["Para impedir todas as trocas", -25, "Os capilares são locais importantes de troca."],
-       ["Para armazenar ossos", -25, "Os capilares são vasos sanguíneos muito pequenos."]
-     ]],
-     ["Coração em repouso", "A frequência cardíaca pode variar entre pessoas?", [
-       ["Sim, depende de fatores como idade e atividade", 100, "A frequência varia conforme a pessoa e a situação."],
-       ["Não, é igual para todo mundo", -25, "A frequência cardíaca não é igual para todas as pessoas."],
-       ["Só muda durante o sono", 50, "Ela pode mudar durante exercício, repouso, sono e emoções."]
-     ]],
-     ["O coração é músculo", "Por que o coração é considerado um órgão muscular?", [
-       ["Porque seu músculo se contrai para bombear sangue", 100, "O músculo cardíaco realiza contrações involuntárias."],
-       ["Porque movimenta diretamente os braços", 50, "Os músculos esqueléticos movimentam os braços."],
-       ["Porque é feito apenas de osso", -25, "O coração não é feito apenas de osso."]
-     ]],
-     ["Circulação dupla", "Por que a circulação humana é chamada de dupla?", [
-       ["Porque possui os circuitos pulmonar e sistêmico", 100, "O sangue passa pelo circuito pulmonar e pelo sistêmico."],
-       ["Porque temos dois corações", -25, "Os seres humanos têm um coração com quatro cavidades."],
-       ["Porque o sangue circula só duas vezes na vida", -25, "A circulação é contínua."]
-     ]]
+     {
+       tema: "O coração",
+       pergunta: "Qual é a principal função do coração?",
+       opcoes: [
+         ["Bombear o sangue pelo corpo", 100, "O coração impulsiona o sangue pela circulação."],
+         ["Produzir todas as células sanguíneas", -25, "As células sanguíneas são produzidas principalmente na medula óssea."],
+         ["Filtrar o ar que respiramos", -25, "Essa função pertence ao sistema respiratório."]
+       ]
+     },
+     {
+       tema: "As hemácias",
+       pergunta: "Qual é a principal função das hemácias?",
+       opcoes: [
+         ["Transportar oxigênio", 100, "As hemácias transportam grande parte do oxigênio do sangue."],
+         ["Combater todos os micróbios", 50, "A defesa do organismo envolve principalmente os glóbulos brancos."],
+         ["Bombear o sangue", -25, "Quem bombeia o sangue é o coração."]
+       ]
+     },
+     {
+       tema: "Glóbulos brancos",
+       pergunta: "Qual é a função dos glóbulos brancos?",
+       opcoes: [
+         ["Ajudar na defesa do organismo", 100, "Eles participam da defesa contra agentes infecciosos."],
+         ["Transportar a maior parte do oxigênio", 50, "Essa função é realizada principalmente pelas hemácias."],
+         ["Produzir os batimentos cardíacos", -25, "Os batimentos são produzidos pela atividade elétrica e muscular do coração."]
+       ]
+     },
+     {
+       tema: "Plaquetas",
+       pergunta: "O que as plaquetas ajudam a fazer?",
+       opcoes: [
+         ["Ajudar a estancar sangramentos", 100, "As plaquetas participam da coagulação do sangue."],
+         ["Levar ar aos pulmões", -25, "O ar passa pelas vias respiratórias."],
+         ["Bombear sangue para as pernas", -25, "Essa função é realizada pelo coração."]
+       ]
+     },
+     {
+       tema: "Plasma",
+       pergunta: "O que é o plasma sanguíneo?",
+       opcoes: [
+         ["A parte líquida do sangue", 100, "O plasma transporta substâncias como nutrientes e hormônios."],
+         ["Um tipo de osso", -25, "O plasma é a parte líquida do sangue."],
+         ["Uma cavidade cardíaca", -25, "As cavidades do coração são os átrios e ventrículos."]
+       ]
+     },
+     {
+       tema: "Artérias",
+       pergunta: "Em geral, para onde as artérias levam o sangue?",
+       opcoes: [
+         ["Para fora do coração", 100, "As artérias levam o sangue para longe do coração."],
+         ["Sempre para dentro do coração", -25, "As veias normalmente trazem o sangue de volta ao coração."],
+         ["Somente para os pulmões", 50, "A artéria pulmonar vai aos pulmões, mas existem outras artérias."]
+       ]
+     },
+     {
+       tema: "Veias",
+       pergunta: "Qual é a função geral das veias?",
+       opcoes: [
+         ["Levar sangue de volta ao coração", 100, "As veias fazem o retorno do sangue ao coração."],
+         ["Produzir células sanguíneas", -25, "As células sanguíneas são produzidas principalmente na medula óssea."],
+         ["Levar ar para os pulmões", -25, "O ar circula pelas vias respiratórias."]
+       ]
+     },
+     {
+       tema: "Capilares",
+       pergunta: "O que acontece principalmente nos capilares?",
+       opcoes: [
+         ["Trocas de gases, nutrientes e resíduos com os tecidos", 100, "Os capilares permitem trocas entre o sangue e as células."],
+         ["O coração produz batimentos", -25, "Os batimentos acontecem no coração."],
+         ["O ar é produzido", -25, "O ar não é produzido pelos capilares."]
+       ]
+     },
+     {
+       tema: "Cavidades do coração",
+       pergunta: "Quantas cavidades tem o coração humano?",
+       opcoes: [
+         ["Quatro", 100, "São dois átrios e dois ventrículos."],
+         ["Duas", 50, "O coração possui dois lados, mas quatro cavidades."],
+         ["Seis", -25, "O coração humano tem quatro cavidades."]
+       ]
+     },
+     {
+       tema: "Átrios",
+       pergunta: "Qual é a função dos átrios?",
+       opcoes: [
+         ["Receber o sangue que chega ao coração", 100, "O sangue chega primeiro aos átrios."],
+         ["Produzir oxigênio", -25, "O oxigênio passa para o sangue nos pulmões."],
+         ["Filtrar o sangue como os rins", -25, "Os rins filtram o sangue; os átrios o recebem."]
+       ]
+     },
+     {
+       tema: "Ventrículos",
+       pergunta: "O que os ventrículos fazem?",
+       opcoes: [
+         ["Bombeiam o sangue para fora do coração", 100, "O ventrículo direito envia sangue aos pulmões e o esquerdo ao corpo."],
+         ["Recebem ar da traqueia", -25, "A traqueia pertence ao sistema respiratório."],
+         ["Produzem plaquetas", -25, "As plaquetas são formadas principalmente na medula óssea."]
+       ]
+     },
+     {
+       tema: "Coração direito",
+       pergunta: "Para onde o lado direito do coração bombeia o sangue?",
+       opcoes: [
+         ["Para os pulmões", 100, "O ventrículo direito envia sangue aos pulmões para as trocas gasosas."],
+         ["Diretamente para todo o corpo", 50, "O lado esquerdo bombeia sangue para a circulação sistêmica."],
+         ["Somente para o estômago", -25, "O sangue é distribuído para vários órgãos."]
+       ]
+     },
+     {
+       tema: "Coração esquerdo",
+       pergunta: "Para onde o lado esquerdo do coração bombeia o sangue?",
+       opcoes: [
+         ["Para o restante do corpo", 100, "O ventrículo esquerdo bombeia sangue para o organismo."],
+         ["Somente para os pulmões", 50, "O lado direito envia sangue aos pulmões."],
+         ["Somente para o estômago", -25, "O sangue chega a vários órgãos e tecidos."]
+       ]
+     },
+     {
+       tema: "Artéria pulmonar",
+       pergunta: "Que tipo de sangue a artéria pulmonar transporta?",
+       opcoes: [
+         ["Sangue com pouco oxigênio em direção aos pulmões", 100, "A artéria pulmonar é uma exceção: transporta sangue com pouco oxigênio."],
+         ["Sangue sem células sanguíneas", -25, "O sangue contém plasma e elementos celulares."],
+         ["Sangue rico em oxigênio vindo dos pulmões", 50, "As veias pulmonares trazem sangue rico em oxigênio ao coração."]
+       ]
+     },
+     {
+       tema: "Veias pulmonares",
+       pergunta: "O que as veias pulmonares levam ao coração?",
+       opcoes: [
+         ["Sangue rico em oxigênio vindo dos pulmões", 100, "Elas chegam ao átrio esquerdo."],
+         ["Sangue com pouco oxigênio vindo do corpo", 50, "Esse sangue retorna pelas veias cavas."],
+         ["Ar para o coração", -25, "O ar não circula dentro das veias."]
+       ]
+     },
+     {
+       tema: "Aorta",
+       pergunta: "Qual é a função da aorta?",
+       opcoes: [
+         ["Levar sangue do coração para o corpo", 100, "A aorta é a maior artéria do corpo humano."],
+         ["Levar ar para os pulmões", -25, "A aorta é um vaso sanguíneo."],
+         ["Trazer sangue dos pulmões ao coração", 50, "Essa é a função das veias pulmonares."]
+       ]
+     },
+     {
+       tema: "Veias cavas",
+       pergunta: "O que as veias cavas fazem?",
+       opcoes: [
+         ["Trazem sangue do corpo para o átrio direito", 100, "As veias cavas retornam sangue ao coração."],
+         ["Levam sangue do coração aos pulmões", 50, "Essa é a função da artéria pulmonar."],
+         ["Levam ar ao estômago", -25, "O ar não circula pelos vasos sanguíneos."]
+       ]
+     },
+     {
+       tema: "Circulação pulmonar",
+       pergunta: "Qual caminho descreve a circulação pulmonar?",
+       opcoes: [
+         ["Coração, pulmões e coração", 100, "O sangue vai aos pulmões e depois retorna ao coração."],
+         ["Coração, pernas e cérebro apenas", 50, "Esses órgãos participam da circulação sistêmica."],
+         ["Estômago e rins sem passar pelo coração", -25, "O coração impulsiona o sangue pela circulação."]
+       ]
+     },
+     {
+       tema: "Circulação sistêmica",
+       pergunta: "Qual caminho descreve a circulação sistêmica?",
+       opcoes: [
+         ["Coração, corpo e coração", 100, "O sangue vai aos tecidos e depois retorna ao coração."],
+         ["Pulmões, traqueia e nariz", -25, "Esse caminho está relacionado à respiração."],
+         ["Somente o lado direito do coração", -25, "A circulação sistêmica sai do ventrículo esquerdo."]
+       ]
+     },
+     {
+       tema: "Oxigênio",
+       pergunta: "Por que as células precisam de oxigênio?",
+       opcoes: [
+         ["Para ajudar na produção de energia", 100, "Muitas células utilizam oxigênio na respiração celular."],
+         ["Para transformar ossos em sangue", -25, "O oxigênio não transforma ossos em sangue."],
+         ["Para substituir toda a água do corpo", -25, "Água e oxigênio têm funções diferentes."]
+       ]
+     },
+     {
+       tema: "Gás carbônico",
+       pergunta: "O que acontece com grande parte do gás carbônico produzido pelo corpo?",
+       opcoes: [
+         ["É levado aos pulmões para ser eliminado", 100, "O gás carbônico passa para os pulmões e sai na expiração."],
+         ["Fica guardado para sempre no coração", -25, "O corpo precisa eliminar o excesso de gás carbônico."],
+         ["Vira osso imediatamente", -25, "O gás carbônico não se transforma diretamente em osso."]
+       ]
+     },
+     {
+       tema: "Pulmões",
+       pergunta: "Qual é o papel dos pulmões na circulação?",
+       opcoes: [
+         ["Permitir que o sangue receba oxigênio e elimine gás carbônico", 100, "As trocas gasosas acontecem nos pulmões."],
+         ["Bombear sangue para todo o corpo", -25, "Quem bombeia o sangue é o coração."],
+         ["Produzir todas as células sanguíneas", -25, "As células sanguíneas são produzidas principalmente na medula óssea."]
+       ]
+     },
+     {
+       tema: "Alvéolos",
+       pergunta: "Onde ocorrem as trocas gasosas nos pulmões?",
+       opcoes: [
+         ["Nos alvéolos pulmonares", 100, "Os alvéolos ficam próximos dos capilares sanguíneos."],
+         ["Nas válvulas cardíacas", -25, "As válvulas controlam o fluxo de sangue."],
+         ["Nos ossos das pernas", -25, "As trocas gasosas acontecem nos pulmões."]
+       ]
+     },
+     {
+       tema: "Batimentos cardíacos",
+       pergunta: "O que representa um batimento cardíaco?",
+       opcoes: [
+         ["A atividade de contração e relaxamento do coração", 100, "O ciclo cardíaco envolve contração e relaxamento."],
+         ["Uma respiração completa", -25, "Respiração e batimento cardíaco são processos diferentes."],
+         ["O movimento dos alimentos no estômago", -25, "A digestão é outro processo do corpo."]
+       ]
+     },
+     {
+       tema: "Sístole",
+       pergunta: "O que acontece durante a sístole ventricular?",
+       opcoes: [
+         ["Os ventrículos se contraem e ejetam sangue", 100, "A contração impulsiona sangue para as artérias."],
+         ["Os pulmões param de funcionar", -25, "A sístole é uma fase do ciclo cardíaco."],
+         ["O sangue deixa de circular", -25, "O sangue continua circulando durante o ciclo cardíaco."]
+       ]
+     },
+     {
+       tema: "Diástole",
+       pergunta: "O que acontece durante a diástole?",
+       opcoes: [
+         ["O coração relaxa e suas cavidades se enchem", 100, "O relaxamento permite o enchimento das cavidades cardíacas."],
+         ["O coração fica permanentemente parado", -25, "A diástole é uma fase normal do ciclo cardíaco."],
+         ["As artérias viram veias", -25, "Artérias e veias são vasos sanguíneos diferentes."]
+       ]
+     },
+     {
+       tema: "Pulso",
+       pergunta: "O que você percebe quando mede o pulso no punho?",
+       opcoes: [
+         ["Ondas de pressão nas artérias", 100, "Essas ondas estão relacionadas aos batimentos cardíacos."],
+         ["O ar entrando nos pulmões", -25, "A respiração e o pulso são processos diferentes."],
+         ["A digestão dos alimentos", -25, "O pulso está ligado à circulação."]
+       ]
+     },
+     {
+       tema: "Cor do sangue",
+       pergunta: "Qual afirmação sobre a cor do sangue humano está correta?",
+       opcoes: [
+         ["O sangue é vermelho e pode ter tons diferentes", 100, "O sangue com mais oxigênio tende a ser vermelho mais vivo."],
+         ["O sangue das veias é azul", -25, "O sangue é vermelho; a pele pode fazer as veias parecerem azuladas."],
+         ["O sangue humano é sempre verde", -25, "O sangue humano é vermelho."]
+       ]
+     },
+     {
+       tema: "Tecido sanguíneo",
+       pergunta: "Como o sangue é classificado no corpo humano?",
+       opcoes: [
+         ["Como um tecido líquido", 100, "O sangue é formado por plasma e elementos celulares."],
+         ["Como um osso líquido", -25, "O sangue é um tecido, não um osso."],
+         ["Como um órgão sólido", -25, "O sangue é um tecido líquido."]
+       ]
+     },
+     {
+       tema: "Entrada de oxigênio",
+       pergunta: "Como o oxigênio entra no sangue?",
+       opcoes: [
+         ["Pelas trocas gasosas nos pulmões", 100, "O oxigênio passa dos alvéolos para o sangue."],
+         ["Pelos alimentos diretamente para as veias", -25, "O oxigênio vem principalmente do ar respirado."],
+         ["É fabricado pelo coração", -25, "O coração bombeia sangue, mas não fabrica oxigênio."]
+       ]
+     },
+     {
+       tema: "Nutrientes",
+       pergunta: "Como muitos nutrientes chegam às células?",
+       opcoes: [
+         ["São transportados pelo sangue", 100, "O sangue distribui nutrientes absorvidos pelo sistema digestório."],
+         ["São transportados somente pelo ar", -25, "O sangue transporta muitos nutrientes e oxigênio."],
+         ["São produzidos pelas artérias", -25, "As artérias transportam sangue."]
+       ]
+     },
+     {
+       tema: "Hormônios",
+       pergunta: "Qual é uma função do sangue relacionada aos hormônios?",
+       opcoes: [
+         ["Transportar hormônios até órgãos e tecidos", 100, "O sangue ajuda a distribuir hormônios pelo corpo."],
+         ["Destruir todos os hormônios", -25, "Os hormônios são mensageiros químicos importantes."],
+         ["Transformar hormônios em ossos", -25, "Hormônios não se transformam diretamente em ossos."]
+       ]
+     },
+     {
+       tema: "Temperatura corporal",
+       pergunta: "Como a circulação ajuda a regular a temperatura do corpo?",
+       opcoes: [
+         ["Distribuindo calor e ajustando o fluxo sanguíneo na pele", 100, "Os vasos sanguíneos ajudam o corpo a trocar calor com o ambiente."],
+         ["Parando todos os batimentos", -25, "O coração precisa continuar bombeando sangue."],
+         ["Transformando o sangue em gelo", -25, "O sangue permanece líquido em condições normais."]
+       ]
+     },
+     {
+       tema: "Coagulação",
+       pergunta: "Por que a coagulação do sangue é importante?",
+       opcoes: [
+         ["Ajuda a reduzir a perda de sangue em ferimentos", 100, "A coagulação ajuda a controlar sangramentos."],
+         ["Impede o coração de bater", -25, "A coagulação normal ajuda a estancar sangramentos."],
+         ["Leva ar diretamente às células", -25, "O sangue transporta oxigênio, não ar."]
+       ]
+     },
+     {
+       tema: "Miocárdio",
+       pergunta: "Como se chama o músculo do coração?",
+       opcoes: [
+         ["Miocárdio", 100, "O miocárdio é o músculo responsável pela contração cardíaca."],
+         ["Epiderme", -25, "A epiderme é a camada mais externa da pele."],
+         ["Cartilagem", -25, "O miocárdio é tecido muscular."]
+       ]
+     },
+     {
+       tema: "Septo cardíaco",
+       pergunta: "Qual é a função do septo do coração?",
+       opcoes: [
+         ["Separar o lado direito do lado esquerdo", 100, "O septo separa as duas metades do coração."],
+         ["Produzir oxigênio", -25, "O oxigênio vem do ar e passa ao sangue nos pulmões."],
+         ["Ligar o coração ao estômago", -25, "O septo é uma estrutura interna do coração."]
+       ]
+     },
+     {
+       tema: "Válvulas cardíacas",
+       pergunta: "Qual é a função das válvulas cardíacas?",
+       opcoes: [
+         ["Ajudar a impedir que o sangue volte na direção errada", 100, "As válvulas ajudam a manter o fluxo sanguíneo em uma direção."],
+         ["Produzir glóbulos brancos", -25, "Os glóbulos brancos são células sanguíneas."],
+         ["Permitir que o ar entre no coração", -25, "O ar não circula dentro do coração."]
+       ]
+     },
+     {
+       tema: "Válvula tricúspide",
+       pergunta: "Onde fica a válvula tricúspide?",
+       opcoes: [
+         ["Entre o átrio direito e o ventrículo direito", 100, "Ela ajuda a impedir o retorno do sangue ao átrio direito."],
+         ["Entre o átrio esquerdo e o ventrículo esquerdo", -25, "Essa é a posição da válvula mitral."],
+         ["Dentro dos pulmões", -25, "A válvula tricúspide fica no coração."]
+       ]
+     },
+     {
+       tema: "Válvula mitral",
+       pergunta: "Onde fica a válvula mitral?",
+       opcoes: [
+         ["Entre o átrio esquerdo e o ventrículo esquerdo", 100, "A válvula mitral também é chamada de bicúspide."],
+         ["Entre o átrio direito e o ventrículo direito", -25, "Essa é a posição da válvula tricúspide."],
+         ["Entre os dois pulmões", -25, "A válvula mitral fica no coração."]
+       ]
+     },
+     {
+       tema: "Válvula pulmonar",
+       pergunta: "Onde fica a válvula pulmonar?",
+       opcoes: [
+         ["Na saída do ventrículo direito para a artéria pulmonar", 100, "Ela ajuda a impedir que o sangue retorne ao ventrículo."],
+         ["Na saída do ventrículo esquerdo para a aorta", -25, "Essa é a posição da válvula aórtica."],
+         ["Dentro do estômago", -25, "A válvula pulmonar fica no coração."]
+       ]
+     },
+     {
+       tema: "Válvula aórtica",
+       pergunta: "Onde fica a válvula aórtica?",
+       opcoes: [
+         ["Na saída do ventrículo esquerdo para a aorta", 100, "Ela controla a passagem de sangue para a aorta."],
+         ["Entre o átrio direito e o ventrículo direito", -25, "Essa é a posição da válvula tricúspide."],
+         ["Na entrada dos pulmões", -25, "A válvula aórtica fica na saída do ventrículo esquerdo."]
+       ]
+     },
+     {
+       tema: "Frequência cardíaca",
+       pergunta: "O que significa frequência cardíaca?",
+       opcoes: [
+         ["Quantidade de batimentos por minuto", 100, "A frequência cardíaca é expressa em batimentos por minuto."],
+         ["Quantidade de respirações por dia", -25, "Isso está relacionado à frequência respiratória."],
+         ["Quantidade de ossos do corpo", -25, "A frequência cardíaca mede os batimentos do coração."]
+       ]
+     },
+     {
+       tema: "Exercício físico",
+       pergunta: "Por que o coração bate mais rápido durante exercícios?",
+       opcoes: [
+         ["Os músculos precisam de mais oxigênio e nutrientes", 100, "O coração aumenta o fluxo sanguíneo para atender à demanda."],
+         ["O sangue deixa de circular", -25, "A circulação continua e geralmente aumenta durante o exercício."],
+         ["Os pulmões param de funcionar", -25, "Os pulmões continuam trabalhando durante o exercício."]
+       ]
+     },
+     {
+       tema: "Cuidar do coração",
+       pergunta: "Qual hábito ajuda a manter o coração saudável?",
+       opcoes: [
+         ["Fazer atividade física adequada regularmente", 100, "A atividade física regular contribui para a saúde cardiovascular."],
+         ["Nunca se movimentar", -25, "Movimentar-se adequadamente beneficia a saúde."],
+         ["Dormir sempre muito pouco", -25, "Dormir o suficiente também é importante para a saúde."]
+       ]
+     },
+     {
+       tema: "Cigarro",
+       pergunta: "Como fumar pode afetar o sistema cardiovascular?",
+       opcoes: [
+         ["Pode prejudicar os vasos e aumentar riscos cardiovasculares", 100, "Fumar aumenta o risco de doenças do coração e dos vasos."],
+         ["Fortalece sempre as artérias", -25, "Fumar pode danificar os vasos sanguíneos."],
+         ["Não afeta a circulação", -25, "O tabagismo prejudica a saúde cardiovascular."]
+       ]
+     },
+     {
+       tema: "Hidratação",
+       pergunta: "Por que beber água é importante para o organismo?",
+       opcoes: [
+         ["Ajuda a manter o equilíbrio de líquidos do corpo", 100, "A hidratação contribui para o funcionamento do organismo."],
+         ["Substitui o sangue", -25, "A água não substitui o sangue."],
+         ["Faz o coração parar", -25, "A hidratação adequada ajuda o corpo a funcionar normalmente."]
+       ]
+     },
+     {
+       tema: "Pressão arterial",
+       pergunta: "O que é a pressão arterial?",
+       opcoes: [
+         ["A força do sangue contra as paredes das artérias", 100, "A pressão arterial está relacionada ao fluxo do sangue."],
+         ["A temperatura dos pulmões", -25, "Pressão arterial não é temperatura."],
+         ["A quantidade de ossos", -25, "A pressão arterial está relacionada à circulação."]
+       ]
+     },
+     {
+       tema: "Alimentação",
+       pergunta: "Qual escolha costuma ajudar na saúde cardiovascular?",
+       opcoes: [
+         ["Ter alimentação equilibrada e variada", 100, "Uma alimentação equilibrada contribui para a saúde do coração."],
+         ["Comer somente um alimento", -25, "O organismo precisa de vários nutrientes."],
+         ["Evitar toda atividade física", -25, "A atividade física adequada é benéfica para muitas pessoas."]
+       ]
+     },
+     {
+       tema: "Circulação contínua",
+       pergunta: "Como o sangue circula pelo corpo?",
+       opcoes: [
+         ["Continuamente pelos vasos, impulsionado pelo coração", 100, "O coração e os vasos mantêm o sangue em circulação."],
+         ["Uma única vez e depois desaparece", -25, "O sangue circula continuamente."],
+         ["Somente nos braços", -25, "O sangue chega aos tecidos de todo o corpo."]
+       ]
+     },
+     {
+       tema: "Cérebro",
+       pergunta: "Por que o cérebro precisa receber sangue continuamente?",
+       opcoes: [
+         ["Para receber oxigênio e glicose", 100, "O cérebro precisa de oxigênio e nutrientes para funcionar."],
+         ["Para transformar sangue em ar", -25, "O sangue transporta substâncias importantes ao cérebro."],
+         ["Para produzir todos os ossos", -25, "O cérebro não produz todos os ossos."]
+       ]
+     },
+     {
+       tema: "Rins",
+       pergunta: "Qual é uma função dos rins relacionada ao sangue?",
+       opcoes: [
+         ["Filtrar o sangue e ajudar a eliminar resíduos pela urina", 100, "Os rins ajudam a regular líquidos e remover resíduos."],
+         ["Bombear sangue aos pulmões", -25, "Essa é uma função do coração."],
+         ["Transportar ar pela traqueia", -25, "O ar circula no sistema respiratório."]
+       ]
+     },
+     {
+       tema: "Intestino",
+       pergunta: "Depois da digestão, como muitos nutrientes chegam ao corpo?",
+       opcoes: [
+         ["São absorvidos no intestino e transportados pelo sangue", 100, "Muitos nutrientes entram na circulação após a absorção intestinal."],
+         ["São enviados diretamente pelos ossos", -25, "Os ossos não transportam diretamente os nutrientes digeridos."],
+         ["Transformam-se em ar nos pulmões", -25, "Os nutrientes são absorvidos e distribuídos pelo organismo."]
+       ]
+     },
+     {
+       tema: "Sangue nas pernas",
+       pergunta: "O que ajuda o sangue das pernas a retornar ao coração?",
+       opcoes: [
+         ["Contrações musculares e válvulas das veias", 100, "Os músculos ajudam a impulsionar o sangue e as válvulas reduzem o refluxo."],
+         ["A gravidade sempre empurra o sangue para cima", -25, "A gravidade dificulta o retorno do sangue das pernas."],
+         ["Somente os pulmões", -25, "Os músculos e as válvulas das veias têm um papel importante."]
+       ]
+     },
+     {
+       tema: "Tipos de vasos",
+       pergunta: "Quais são os três principais tipos de vasos sanguíneos?",
+       opcoes: [
+         ["Artérias, veias e capilares", 100, "Esses três tipos formam a rede de vasos sanguíneos."],
+         ["Nervos, músculos e ossos", -25, "Essas estruturas não são vasos sanguíneos."],
+         ["Traqueia, brônquios e alvéolos", -25, "Essas estruturas pertencem ao sistema respiratório."]
+       ]
+     },
+     {
+       tema: "Capilares finos",
+       pergunta: "Por que as paredes dos capilares são muito finas?",
+       opcoes: [
+         ["Para facilitar as trocas entre sangue e tecidos", 100, "A parede fina facilita as trocas de gases e substâncias."],
+         ["Para impedir todas as trocas", -25, "Os capilares são locais importantes de troca."],
+         ["Para armazenar ossos", -25, "Os capilares são vasos sanguíneos muito pequenos."]
+       ]
+     },
+     {
+       tema: "Frequência em repouso",
+       pergunta: "A frequência cardíaca pode variar de uma pessoa para outra?",
+       opcoes: [
+         ["Sim, depende de fatores como idade e atividade", 100, "A frequência varia conforme a pessoa e a situação."],
+         ["Não, é sempre igual para todo mundo", -25, "A frequência cardíaca não é igual em todas as pessoas."],
+         ["Só muda durante o sono", -25, "Ela pode mudar durante exercícios, repouso, sono e emoções."]
+       ]
+     },
+     {
+       tema: "Coração muscular",
+       pergunta: "Por que o coração é considerado um órgão muscular?",
+       opcoes: [
+         ["Porque seu músculo se contrai para bombear sangue", 100, "O músculo cardíaco realiza contrações involuntárias."],
+         ["Porque movimenta diretamente os braços", -25, "Os músculos esqueléticos movimentam os braços."],
+         ["Porque é feito apenas de osso", -25, "O coração não é feito apenas de osso."]
+       ]
+     },
+     {
+       tema: "Circulação dupla",
+       pergunta: "Por que a circulação humana é chamada de dupla?",
+       opcoes: [
+         ["Porque possui os circuitos pulmonar e sistêmico", 100, "O sangue passa pelo circuito pulmonar e pelo sistêmico."],
+         ["Porque temos dois corações", -25, "Os seres humanos têm um coração com quatro cavidades."],
+         ["Porque o sangue circula só duas vezes na vida", -25, "A circulação sanguínea é contínua."]
+       ]
+     }
    ];
    
    /* =====================================================
       ESTADO DO JOGO
       ===================================================== */
    
-   let jogador;
-   let cameraX = 0;
    let estado = "inicio";
-   let desafios = [];
-   let desafioAtual = 0;
-   let nomeAtual = "Jogador";
+   let nomeAtual = "";
    let pontuacao = 0;
    let vidas = 3;
+   let jogador;
+   let cameraX = 0;
+   let desafios = [];
+   let desafioAtual = 0;
    let respostasPartida = [];
    let teclas = {};
+   let partidaSalva = false;
    
    const posicoesPerguntas = [350, 790, 1250, 1690, 2020];
    
    function embaralhar(lista) {
      const copia = [...lista];
+   
      for (let i = copia.length - 1; i > 0; i--) {
        const j = Math.floor(Math.random() * (i + 1));
        [copia[i], copia[j]] = [copia[j], copia[i]];
      }
+   
      return copia;
    }
    
    function selecionarPerguntas() {
      return embaralhar(bancoPerguntas)
        .slice(0, 5)
-       .map((p, i) => ({
-         titulo: p[0],
-         texto: p[1],
-         opcoes: p[2].map(a => ({
-           texto: a[0],
-           pontos: a[1],
-           explicacao: a[2]
+       .map((pergunta, indice) => ({
+         tema: pergunta.tema,
+         pergunta: pergunta.pergunta,
+         opcoes: pergunta.opcoes.map(opcao => ({
+           texto: opcao[0],
+           pontos: opcao[1],
+           explicacao: opcao[2]
          })),
-         x: posicoesPerguntas[i],
-         fase: i + 1
+         x: posicoesPerguntas[indice]
        }));
    }
    
    function criarJogador() {
      return {
        x: 70,
-       y: CHAO - 36,
+       y: CHAO - 32,
        w: 36,
-       h: 30,
+       h: 28,
        vx: 0,
        vy: 0,
        velocidade: 4,
@@ -404,15 +641,15 @@
      };
    }
    
-   function mostrar(el) {
-     if (el) el.classList.remove("escondido");
+   function mostrar(elemento) {
+     if (elemento) elemento.classList.remove("escondido");
    }
    
-   function esconder(el) {
-     if (el) el.classList.add("escondido");
+   function esconder(elemento) {
+     if (elemento) elemento.classList.add("escondido");
    }
    
-   function esconderTodasTelas() {
+   function esconderTelas() {
      esconder(mensagem);
      esconder(telaPergunta);
      esconder(telaResultado);
@@ -424,7 +661,7 @@
      vidasPainel.textContent = vidas;
      pontosPainel.textContent = pontuacao;
    
-     const nomesFases = [
+     const fases = [
        "Coração direito",
        "Pulmões",
        "Coração esquerdo",
@@ -433,47 +670,65 @@
      ];
    
      fasePainel.textContent =
-       nomesFases[Math.min(desafioAtual, nomesFases.length - 1)];
+       fases[Math.min(desafioAtual, fases.length - 1)];
    }
    
-   function iniciarJogo() {
-     nomeAtual = nomeInput.value.trim() || "Jogador";
-     nomeAtual = nomeAtual.slice(0, 30);
+   /* =====================================================
+      INICIAR E TROCAR DE JOGADOR
+      ===================================================== */
    
+   function iniciarJogo() {
+     const nomeDigitado = nomeInput.value.trim();
+   
+     if (!nomeDigitado) {
+       nomeInput.focus();
+       nomeInput.placeholder = "Digite seu nome para começar!";
+       return;
+     }
+   
+     nomeAtual = nomeDigitado.slice(0, 30);
      pontuacao = 0;
      vidas = 3;
      desafioAtual = 0;
      respostasPartida = [];
+     partidaSalva = false;
      cameraX = 0;
      jogador = criarJogador();
      desafios = selecionarPerguntas();
+     teclas = {};
    
      esconder(cadastro);
-     esconderTodasTelas();
+     esconderTelas();
      mostrar(informacoes);
+     mostrar(controles);
    
      estado = "jogando";
      atualizarPainel();
-     canvas.focus();
    }
    
    function novoJogador() {
-     esconderTodasTelas();
+     esconderTelas();
      esconder(informacoes);
+     esconder(controles);
      mostrar(cadastro);
+   
      estado = "inicio";
+     teclas = {};
      nomeInput.value = "";
      nomeInput.focus();
    }
    
    btnComecar.addEventListener("click", iniciarJogo);
+   btnIniciarDoPainel?.addEventListener("click", iniciarJogo);
+   btnProximoJogador.addEventListener("click", novoJogador);
+   btnNovoJogador.addEventListener("click", novoJogador);
    
-   nomeInput.addEventListener("keydown", e => {
-     if (e.key === "Enter") iniciarJogo();
+   nomeInput.addEventListener("keydown", evento => {
+     if (evento.key === "Enter") iniciarJogo();
    });
    
    /* =====================================================
-      MOVIMENTAÇÃO E CONTROLES
+      TECLADO E CONTROLES DE TOQUE
       ===================================================== */
    
    function pular() {
@@ -483,61 +738,79 @@
      }
    }
    
-   window.addEventListener("keydown", e => {
-     const tecla = e.key.toLowerCase();
+   window.addEventListener("keydown", evento => {
+     const tecla = evento.key.toLowerCase();
    
-     if (["arrowleft", "arrowright", "arrowup", " "].includes(tecla)) {
-       e.preventDefault();
+     if (
+       ["arrowleft", "arrowright", "arrowup", " "].includes(tecla) &&
+       estado === "jogando"
+     ) {
+       evento.preventDefault();
      }
    
-     if (tecla === "arrowleft" || tecla === "a") teclas.esquerda = true;
-     if (tecla === "arrowright" || tecla === "d") teclas.direita = true;
+     if (tecla === "arrowleft" || tecla === "a") {
+       teclas.esquerda = true;
+     }
    
-     if (tecla === " " || tecla === "arrowup" || tecla === "w") {
-       if (!e.repeat) pular();
+     if (tecla === "arrowright" || tecla === "d") {
+       teclas.direita = true;
+     }
+   
+     if (
+       (tecla === " " || tecla === "arrowup" || tecla === "w") &&
+       !evento.repeat
+     ) {
+       pular();
      }
    });
    
-   window.addEventListener("keyup", e => {
-     const tecla = e.key.toLowerCase();
-     if (tecla === "arrowleft" || tecla === "a") teclas.esquerda = false;
-     if (tecla === "arrowright" || tecla === "d") teclas.direita = false;
+   window.addEventListener("keyup", evento => {
+     const tecla = evento.key.toLowerCase();
+   
+     if (tecla === "arrowleft" || tecla === "a") {
+       teclas.esquerda = false;
+     }
+   
+     if (tecla === "arrowright" || tecla === "d") {
+       teclas.direita = false;
+     }
    });
    
    window.addEventListener("blur", () => {
      teclas = {};
    });
    
-   function configurarToque(botao, acao, soltar) {
-     botao.addEventListener("pointerdown", e => {
-       e.preventDefault();
-       if (botao.setPointerCapture) botao.setPointerCapture(e.pointerId);
-       acao();
+   function configurarBotaoToque(botao, aoPressionar, aoSoltar) {
+     botao.addEventListener("pointerdown", evento => {
+       evento.preventDefault();
+   
+       if (estado !== "jogando") return;
+   
+       botao.setPointerCapture?.(evento.pointerId);
+       aoPressionar();
      });
    
-     ["pointerup", "pointercancel", "lostpointercapture"].forEach(evento => {
-       botao.addEventListener(evento, () => {
-         if (soltar) soltar();
-       });
+     ["pointerup", "pointercancel", "lostpointercapture"].forEach(tipo => {
+       botao.addEventListener(tipo, () => aoSoltar());
      });
    }
    
-   configurarToque(
+   configurarBotaoToque(
      btnEsquerda,
      () => { teclas.esquerda = true; },
      () => { teclas.esquerda = false; }
    );
    
-   configurarToque(
+   configurarBotaoToque(
      btnDireita,
      () => { teclas.direita = true; },
      () => { teclas.direita = false; }
    );
    
-   configurarToque(btnPular, pular);
+   configurarBotaoToque(btnPular, pular, () => {});
    
    /* =====================================================
-      PERGUNTAS
+      PERGUNTAS E RESPOSTAS
       ===================================================== */
    
    function abrirPergunta(indice) {
@@ -545,64 +818,71 @@
    
      estado = "pergunta";
      desafioAtual = indice;
+     teclas = {};
    
-     const pergunta = desafios[indice];
-   
-     perguntaTitulo.textContent =
-       `🩸 Pergunta ${indice + 1}: ${pergunta.titulo}`;
-     perguntaTexto.textContent = pergunta.texto;
-     feedback.textContent = "";
-     opcoes.innerHTML = "";
-   
-     btnProximo.disabled = true;
-     btnProximo.textContent = "Responda para continuar";
-   
-     embaralhar(pergunta.opcoes).forEach(opcao => {
-       const botao = document.createElement("button");
-       botao.type = "button";
-       botao.className = "opcao-resposta";
-       botao.textContent = opcao.texto;
-   
-       botao.addEventListener("click", () => responderPergunta(opcao, botao));
-   
-       opcoes.appendChild(botao);
-     });
-   
+     esconder(controles);
      esconder(mensagem);
      esconder(telaResultado);
      esconder(rankingTela);
      mostrar(telaPergunta);
+   
+     const desafio = desafios[indice];
+   
+     perguntaTitulo.textContent =
+       `❓ Pergunta ${indice + 1} de ${desafios.length}: ${desafio.tema}`;
+   
+     perguntaTexto.textContent = desafio.pergunta;
+     feedback.textContent = "";
+     opcoes.innerHTML = "";
+   
+     btnProximo.disabled = true;
+     btnProximo.textContent = "Escolha uma resposta";
+   
+     embaralhar(desafio.opcoes).forEach(opcao => {
+       const botao = document.createElement("button");
+   
+       botao.type = "button";
+       botao.textContent = opcao.texto;
+   
+       botao.addEventListener("click", () => {
+         responderPergunta(opcao, botao);
+       });
+   
+       opcoes.appendChild(botao);
+     });
    }
    
    function responderPergunta(opcaoEscolhida, botaoEscolhido) {
-     if (estado !== "pergunta") return;
-     if (btnProximo.disabled === false) return;
+     if (estado !== "pergunta" || !btnProximo.disabled) return;
    
-     pontuacao = Math.max(0, pontuacao + opcaoEscolhida.pontos);
+     pontuacao += opcaoEscolhida.pontos;
    
-     if (opcaoEscolhida.pontos < 0) vidas--;
+     if (opcaoEscolhida.pontos < 0) {
+       vidas = Math.max(0, vidas - 1);
+     }
    
      respostasPartida.push({
-       pergunta: desafios[desafioAtual].texto,
+       pergunta: desafios[desafioAtual].pergunta,
        pontos: opcaoEscolhida.pontos,
        explicacao: opcaoEscolhida.explicacao
      });
    
-     const botoes = opcoes.querySelectorAll("button");
-     botoes.forEach(b => {
-       b.disabled = true;
-       b.style.opacity = "0.7";
+     opcoes.querySelectorAll("button").forEach(botao => {
+       botao.disabled = true;
      });
    
+     botaoEscolhido.style.border = "2px solid #c9184a";
      botaoEscolhido.style.opacity = "1";
-     botaoEscolhido.style.fontWeight = "bold";
    
      if (opcaoEscolhida.pontos === 100) {
-       feedback.textContent = `✅ Correto! +100 pontos. ${opcaoEscolhida.explicacao}`;
+       feedback.textContent =
+         `✅ Correto! +100 pontos. ${opcaoEscolhida.explicacao}`;
      } else if (opcaoEscolhida.pontos === 50) {
-       feedback.textContent = `🟡 Parcialmente correto! +50 pontos. ${opcaoEscolhida.explicacao}`;
+       feedback.textContent =
+         `🟡 Parcialmente correto! +50 pontos. ${opcaoEscolhida.explicacao}`;
      } else {
-       feedback.textContent = `❌ Resposta incorreta! -25 pontos e uma vida perdida. ${opcaoEscolhida.explicacao}`;
+       feedback.textContent =
+         `❌ Incorreto! −25 pontos e uma vida perdida. ${opcaoEscolhida.explicacao}`;
      }
    
      atualizarPainel();
@@ -624,55 +904,82 @@
        return;
      }
    
-     jogador.x = Math.max(jogador.x, desafios[desafioAtual].x + 70);
+     jogador.x = Math.max(
+       jogador.x,
+       desafios[desafioAtual].x + 45
+     );
+   
      desafioAtual++;
      estado = "jogando";
+   
+     mostrar(controles);
      atualizarPainel();
    });
    
    /* =====================================================
-      RESULTADO E RANKING
+      RANKING: TODAS AS PARTIDAS
       ===================================================== */
    
    function lerRanking() {
      try {
-       return JSON.parse(localStorage.getItem("rankingCoracao")) || [];
+       const dados = JSON.parse(
+         localStorage.getItem("rankingCoracao") || "[]"
+       );
+   
+       return Array.isArray(dados) ? dados : [];
      } catch (erro) {
+       console.error("Não foi possível ler o ranking.", erro);
        return [];
      }
    }
    
    function salvarPontuacao() {
+     if (partidaSalva) return;
+   
+     partidaSalva = true;
+   
      const ranking = lerRanking();
    
      ranking.push({
+       id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
        nome: nomeAtual,
        pontos: pontuacao,
-       data: new Date().toLocaleDateString("pt-BR")
+       data: new Date().toLocaleDateString("pt-BR"),
+       horario: new Date().toLocaleTimeString("pt-BR", {
+         hour: "2-digit",
+         minute: "2-digit"
+       })
      });
    
      ranking.sort((a, b) => b.pontos - a.pontos);
    
      try {
-       localStorage.setItem(
-         "rankingCoracao",
-         JSON.stringify(ranking.slice(0, 50))
-       );
+       // Guarda TODAS as partidas, sem limitar a 50 registros.
+       localStorage.setItem("rankingCoracao", JSON.stringify(ranking));
      } catch (erro) {
-       console.warn("Não foi possível salvar o ranking.", erro);
+       console.error("Não foi possível salvar o ranking.", erro);
+       alert("O navegador não conseguiu guardar o ranking. Verifique o espaço disponível.");
      }
    }
    
    function finalizarJogo() {
+     if (estado === "resultado") return;
+   
      estado = "resultado";
+     teclas = {};
+   
      salvarPontuacao();
+   
+     esconderTelas();
+     esconder(controles);
+     mostrar(telaResultado);
    
      tituloResultado.textContent =
        vidas <= 0 ? "❤️‍🩹 Fim da aventura!" : "🏆 Aventura concluída!";
    
      resumo.textContent = vidas <= 0
-       ? `As suas vidas acabaram, ${nomeAtual}. Continue estudando e tente novamente!`
-       : `Parabéns, ${nomeAtual}! Você percorreu o sistema cardiovascular.`;
+       ? `Suas vidas acabaram, ${nomeAtual}. Tente novamente para melhorar sua pontuação!`
+       : `Parabéns, ${nomeAtual}! Você completou as cinco perguntas desta aventura.`;
    
      pontuacaoFinal.textContent = `⭐ Pontuação final: ${pontuacao} pontos`;
    
@@ -682,97 +989,83 @@
    
      respostasPartida.forEach(resposta => {
        const item = document.createElement("li");
+   
+       const sinal = resposta.pontos > 0 ? "+" : "";
+   
        item.textContent =
-         `${resposta.pergunta} — ${resposta.pontos > 0 ? "+" : ""}${resposta.pontos} pontos`;
+         `${resposta.pergunta} (${sinal}${resposta.pontos} pontos)`;
+   
        lista.appendChild(item);
      });
    
      detalhesPartida.appendChild(lista);
-   
-     esconderTodasTelas();
-     mostrar(telaResultado);
      atualizarPainel();
    }
    
    function mostrarRanking() {
      const ranking = lerRanking();
+   
      listaRanking.innerHTML = "";
    
      if (ranking.length === 0) {
        const item = document.createElement("li");
-       item.textContent = "Nenhuma pontuação salva ainda.";
+       item.textContent = "Ainda não há partidas registradas.";
        listaRanking.appendChild(item);
      } else {
        ranking.forEach((registro, indice) => {
          const item = document.createElement("li");
+   
          item.textContent =
-           `${indice + 1}. ${registro.nome} — ${registro.pontos} pontos (${registro.data})`;
+           `${indice + 1}. ${registro.nome} — ${registro.pontos} pontos · ${registro.data || ""} ${registro.horario || ""}`;
+   
          listaRanking.appendChild(item);
        });
      }
    
-     esconderTodasTelas();
+     esconderTelas();
+     esconder(controles);
      mostrar(rankingTela);
      estado = "ranking";
    }
    
    btnVerRanking.addEventListener("click", mostrarRanking);
-   btnNovoJogador.addEventListener("click", novoJogador);
    
    btnLimparRanking.addEventListener("click", () => {
-     const confirmar = window.confirm("Deseja apagar todas as pontuações deste navegador?");
+     const confirmar = window.confirm(
+       "Tem certeza de que deseja apagar todas as partidas salvas neste navegador?"
+     );
+   
      if (!confirmar) return;
    
      localStorage.removeItem("rankingCoracao");
      mostrarRanking();
    });
    
-   btnNovoJogador.addEventListener("click", novoJogador);
-   
-   /* O botão de ranking também permite iniciar outra partida ao voltar. */
-   btnVerRanking.addEventListener("click", () => {
-     estado = "ranking";
-   });
-   
-   function voltarParaCadastro() {
-     esconderTodasTelas();
-     esconder(informacoes);
-     mostrar(cadastro);
-     estado = "inicio";
-   }
-   
-   function configurarInicio() {
-     mostrar(cadastro);
-     mostrar(mensagem);
-     esconder(informacoes);
-     esconder(telaPergunta);
-     esconder(telaResultado);
-     esconder(rankingTela);
-   }
-   
    /* =====================================================
-      DESENHO DO JOGO
+      DESENHO DO CENÁRIO
       ===================================================== */
    
    function desenharFundo() {
      const gradiente = ctx.createLinearGradient(0, 0, 0, H);
+   
      gradiente.addColorStop(0, "#e7f8ff");
      gradiente.addColorStop(1, "#ffffff");
    
      ctx.fillStyle = gradiente;
      ctx.fillRect(0, 0, W, H);
    
-     // Vasos decorativos
      ctx.lineCap = "round";
      ctx.lineWidth = 20;
-     ctx.strokeStyle = "rgba(201,24,74,0.12)";
+     ctx.strokeStyle = "rgba(201,24,74,0.10)";
+   
      ctx.beginPath();
      ctx.moveTo(-cameraX * 0.2, 100);
      ctx.bezierCurveTo(180, 20, 250, 160, 430, 90);
      ctx.stroke();
    
      ctx.lineWidth = 15;
-     ctx.strokeStyle = "rgba(40,100,200,0.12)";
+     ctx.strokeStyle = "rgba(40,100,200,0.10)";
+   
      ctx.beginPath();
      ctx.moveTo(280 - cameraX * 0.15, 220);
      ctx.bezierCurveTo(450, 160, 540, 260, 750, 200);
@@ -785,11 +1078,6 @@
    
      ctx.fillStyle = "#73c96a";
      ctx.fillRect(0, CHAO, W, 7);
-   
-     ctx.fillStyle = "rgba(60,150,60,0.25)";
-     for (let x = 0; x < W; x += 45) {
-       ctx.fillRect(x, CHAO + 20, 20, 4);
-     }
    }
    
    function desenharJogador() {
@@ -810,7 +1098,7 @@
      ctx.ellipse(0, 0, 10, 7, -0.1, 0, Math.PI * 2);
      ctx.fill();
    
-     ctx.fillStyle = "#fff";
+     ctx.fillStyle = "#ffffff";
      ctx.beginPath();
      ctx.arc(-6, -3, 2.5, 0, Math.PI * 2);
      ctx.arc(6, -3, 2.5, 0, Math.PI * 2);
@@ -830,6 +1118,7 @@
        if (indice < desafioAtual) return;
    
        const x = desafio.x - cameraX;
+   
        if (x < -40 || x > W + 40) return;
    
        ctx.fillStyle = "#ffd166";
@@ -841,36 +1130,39 @@
        ctx.font = "bold 18px Arial";
        ctx.textAlign = "center";
        ctx.fillText("?", x, CHAO - 17);
-   
-       ctx.font = "12px Arial";
-       ctx.fillStyle = "#24445b";
-       ctx.fillText("Pergunta", x, CHAO - 48);
      });
    }
    
    function desenharProgresso() {
      ctx.fillStyle = "rgba(255,255,255,0.9)";
-     ctx.fillRect(12, 12, 170, 38);
+     ctx.fillRect(12, 12, 150, 34);
    
      ctx.fillStyle = "#273746";
      ctx.font = "bold 14px Arial";
      ctx.textAlign = "left";
-     ctx.fillText(`Pergunta ${Math.min(desafioAtual + 1, 5)} de 5`, 22, 36);
    
-     ctx.fillStyle = "#e63946";
-     ctx.fillRect(110, 23, 58 * (desafioAtual / 5), 9);
+     const perguntaNumero = Math.min(desafioAtual + 1, 5);
    
-     ctx.strokeStyle = "#e63946";
-     ctx.strokeRect(110, 23, 58, 9);
+     ctx.fillText(`Pergunta ${perguntaNumero} de 5`, 20, 33);
    }
    
    function desenhar() {
      desenharFundo();
      desenharChao();
-     desenharPerguntas();
-     desenharJogador();
-     desenharProgresso();
+   
+     if (jogador) {
+       desenharPerguntas();
+       desenharJogador();
+   
+       if (estado === "jogando") {
+         desenharProgresso();
+       }
+     }
    }
+   
+   /* =====================================================
+      ATUALIZAÇÃO DO JOGO
+      ===================================================== */
    
    function atualizar() {
      if (estado !== "jogando") return;
@@ -881,7 +1173,10 @@
      if (teclas.direita) jogador.vx = jogador.velocidade;
    
      jogador.x += jogador.vx;
-     jogador.x = Math.max(0, Math.min(MUNDO - jogador.w, jogador.x));
+     jogador.x = Math.max(
+       0,
+       Math.min(MUNDO - jogador.w, jogador.x)
+     );
    
      jogador.vy += 0.55;
      jogador.y += jogador.vy;
@@ -892,7 +1187,10 @@
        jogador.noChao = true;
      }
    
-     cameraX = Math.max(0, Math.min(MUNDO - W, jogador.x - W * 0.35));
+     cameraX = Math.max(
+       0,
+       Math.min(MUNDO - W, jogador.x - W * 0.35)
+     );
    
      if (
        desafioAtual < desafios.length &&
@@ -901,25 +1199,32 @@
        abrirPergunta(desafioAtual);
      }
    
-     if (jogador.x >= MUNDO - 100 && desafioAtual >= desafios.length) {
-       finalizarJogo();
-     }
-   
      atualizarPainel();
    }
    
    function loop() {
      if (estado === "jogando") atualizar();
+   
      desenhar();
      requestAnimationFrame(loop);
    }
    
    /* =====================================================
-      INICIALIZAÇÃO
+      TELA INICIAL
       ===================================================== */
    
-   jogador = criarJogador();
-   desafios = selecionarPerguntas();
+   function configurarInicio() {
+     jogador = criarJogador();
+   
+     esconderTelas();
+     esconder(informacoes);
+     esconder(controles);
+   
+     mostrar(cadastro);
+   
+     estado = "inicio";
+   }
+   
    configurarInicio();
    loop();
    
